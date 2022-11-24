@@ -2,6 +2,11 @@ use super::{blocks::BlockType, game::GameData};
 
 type Coord = (usize, usize);
 
+fn get_random_falling_piece() -> Piece {
+    // TODO implement this properly
+    get_i(4, 18)
+}
+
 #[derive(Debug)]
 pub struct Piece {
     pub block_type: BlockType,
