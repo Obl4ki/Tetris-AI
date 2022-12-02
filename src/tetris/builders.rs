@@ -36,7 +36,7 @@ impl GameBuilder {
         self
     }
 
-    pub fn compile(mut self) -> Game {
+    pub fn compile(self) -> Game {
         let falling_piece = self.falling_piece.unwrap_or_else(get_random_falling_piece);
         Game {
             board: self.data,

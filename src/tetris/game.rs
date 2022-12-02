@@ -33,7 +33,7 @@ impl Game {
                 .get(y)
                 .context(format!("Block with ({} {}) is off the grid", &x, &y))?;
 
-            let is_colliding = target_block == &BlockType::None;
+            let is_colliding = target_block != &BlockType::None;
 
             if is_colliding {
                 return Ok(true);
@@ -49,6 +49,10 @@ impl Game {
         }
 
         self.falling_piece.anchor_point.0 -= 1;
+
+        if self.is_colliding().unwrap() {
+            self.falling_piece.anchor_point.0 += 1;
+        }
     }
     pub fn go_right(&mut self) {
         for (_, x) in self.falling_piece.iter_blocks() {
@@ -79,6 +83,7 @@ mod tests {
 
     #[test]
     fn test_collision_block_to_block() {
+        // one block overlap between falling piece's block and board block
         let game = GameBuilder::new(10, 20)
             .add_blocks(vec![(0, 0), (0, 1), (0, 2)], BlockType::SShape)
             .set_falling_piece(Piece {
@@ -92,33 +97,6 @@ mod tests {
     }
 
     #[test]
-    fn test_collision_block_to_border() {
-        let game = GameBuilder::new(10, 20)
-            .set_falling_piece(Piece {
-                block_type: BlockType::OShape,
-                anchor_point: (7, 0),
-                blocks: vec![(0, 0), (1, 0), (2, 0)],
-            })
-            .compile();
-        // on the right edge, should not collide yet
-        assert!(!game.is_colliding().unwrap());
-
-        // move to the right by any value
-        for i in 1..5 {
-            let game = GameBuilder::new(10, 20)
-                .set_falling_piece(Piece {
-                    block_type: BlockType::OShape,
-                    anchor_point: (7 + i, 0),
-                    blocks: vec![(0, 0), (1, 0), (2, 0)],
-                })
-                .compile();
-
-            // bang
-            assert!(game.is_colliding().unwrap())
-        }
-    }
-
-    #[test]
     fn test_move_left() {
         let mut game = GameBuilder::new(10, 20)
             .add_blocks(
@@ -127,8 +105,8 @@ mod tests {
             )
             .set_falling_piece(Piece {
                 block_type: BlockType::OShape,
-                anchor_point: (7, 0),
-                blocks: vec![(4, 0), (4, 1)],
+                anchor_point: (4, 0),
+                blocks: vec![(0, 0), (0, 1)],
             })
             .compile();
 
