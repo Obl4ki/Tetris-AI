@@ -1,5 +1,5 @@
 use crate::tetris::blocks::BlockType;
-use crate::tetris::game::{Game, GameData};
+use crate::tetris::game::{Game};
 use crate::tetris::piece::Piece;
 
 use crate::tetris::piece::get_i;
@@ -37,7 +37,7 @@ impl GameBuilder {
     pub fn compile(mut self) -> Game {
         let falling_piece = self.falling_piece.unwrap_or_else(get_random_falling_piece);
         Game {
-            board: GameData { data: self.data },
+            board: self.data,
             falling_piece,
             width: self.width,
             height: self.height,

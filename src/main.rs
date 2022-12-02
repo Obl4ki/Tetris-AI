@@ -30,10 +30,10 @@ fn setup_system(mut commands: Commands) {
 fn draw_game_state(mut commands: Commands, mut game: ResMut<Game>) {
     let width = game.width;
     let height = game.height;
-    game.board.data[0][0] = BlockType::IShape;
-    game.board.data[0][1] = BlockType::IShape;
+    game.board[0][0] = BlockType::IShape;
+    game.board[0][1] = BlockType::IShape;
     for (x, y) in (0..width).cartesian_product(0..height) {
-        let val = game.board.data[x][y];
+        let val = game.board[x][y];
         let color = get_color_of_block_type(val);
         draw_rectangle(
             &mut commands,

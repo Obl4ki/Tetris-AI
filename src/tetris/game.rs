@@ -3,11 +3,9 @@ use crate::tetris::piece::Piece;
 use crate::tetris::piece::{get_i, get_o};
 use anyhow::{Context, Result};
 
-
-
 #[derive(Debug)]
 pub struct Game {
-    pub board: GameData,
+    pub board: Vec<Vec<BlockType>>,
     pub falling_piece: Piece,
     pub width: usize,
     pub height: usize,
@@ -16,7 +14,7 @@ pub struct Game {
 impl Game {
     pub fn new(width: usize, height: usize) -> Self {
         Self {
-            board: GameData::new(width, height),
+            board: vec![vec![BlockType::None; height]; width],
             falling_piece: get_i(4, 16),
             width,
             height,
@@ -28,7 +26,6 @@ impl Game {
         for (x, y) in self.falling_piece.iter_blocks() {
             let row = self
                 .board
-                .data
                 .get(x)
                 .context(format!("X value of {} is off the grid", &x))?;
 
@@ -47,11 +44,11 @@ impl Game {
     }
 
     pub fn go_left(&mut self) {
-        if self.falling_piece.offset.0 == 0 {
+        if self.falling_piece.anchor_point.0 == 0 {
             return;
         }
 
-        self.falling_piece.offset.0 -= 1;
+        self.falling_piece.anchor_point.0 -= 1;
     }
     pub fn go_right(&mut self) {
         for (_, x) in self.falling_piece.iter_blocks() {
@@ -60,7 +57,7 @@ impl Game {
             }
         }
 
-        self.falling_piece.offset.0 += 1;
+        self.falling_piece.anchor_point.0 += 1;
     }
     pub fn fall_by_one(&mut self) {
         todo!()
@@ -75,19 +72,6 @@ impl Game {
     pub fn rotate_ccw(&mut self) {}
 }
 
-#[derive(Debug)]
-pub struct GameData {
-    pub data: Vec<Vec<BlockType>>,
-}
-
-impl GameData {
-    pub fn new(width: usize, height: usize) -> Self {
-        Self {
-            data: vec![vec![BlockType::None; height]; width],
-        }
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -99,12 +83,11 @@ mod tests {
             .add_blocks(vec![(0, 0), (0, 1), (0, 2)], BlockType::SShape)
             .set_falling_piece(Piece {
                 block_type: BlockType::OShape,
-                offset: (0, 0),
+                anchor_point: (0, 0),
                 blocks: vec![(0, 2), (1, 2), (2, 2)],
             })
             .compile();
 
-        
         assert!(game.is_colliding().unwrap());
     }
 
@@ -113,7 +96,7 @@ mod tests {
         let game = GameBuilder::new(10, 20)
             .set_falling_piece(Piece {
                 block_type: BlockType::OShape,
-                offset: (7, 0),
+                anchor_point: (7, 0),
                 blocks: vec![(0, 0), (1, 0), (2, 0)],
             })
             .compile();
@@ -125,7 +108,7 @@ mod tests {
             let game = GameBuilder::new(10, 20)
                 .set_falling_piece(Piece {
                     block_type: BlockType::OShape,
-                    offset: (7 + i, 0),
+                    anchor_point: (7 + i, 0),
                     blocks: vec![(0, 0), (1, 0), (2, 0)],
                 })
                 .compile();
@@ -144,7 +127,7 @@ mod tests {
             )
             .set_falling_piece(Piece {
                 block_type: BlockType::OShape,
-                offset: (7, 0),
+                anchor_point: (7, 0),
                 blocks: vec![(4, 0), (4, 1)],
             })
             .compile();
