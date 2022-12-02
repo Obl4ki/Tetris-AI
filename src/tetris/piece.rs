@@ -7,7 +7,7 @@ fn get_random_falling_piece() -> Piece {
     get_i(4, 18)
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Piece {
     pub block_type: BlockType,
     pub offset: Coord,

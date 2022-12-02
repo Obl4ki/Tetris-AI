@@ -13,5 +13,6 @@ opt-level = 1
 opt-level = 3
 
 [dependencies]
+anyhow = "1.0.66"
 bevy = { version = "0.8.1", features = ["dynamic"] }
 itertools = "0.10.5"
