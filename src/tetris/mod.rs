@@ -1,4 +1,5 @@
-pub mod game;
+#![allow(unused_imports, dead_code)]
 pub mod blocks;
-pub mod piece;
 pub mod builders;
+pub mod game;
+pub mod piece;

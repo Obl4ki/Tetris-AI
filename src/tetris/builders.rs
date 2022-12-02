@@ -1,5 +1,7 @@
+#![allow(unused_imports, dead_code)]
+
 use crate::tetris::blocks::BlockType;
-use crate::tetris::game::{Game};
+use crate::tetris::game::Game;
 use crate::tetris::piece::Piece;
 
 use crate::tetris::piece::get_i;
