@@ -27,7 +27,7 @@ impl Game {
             let row = self
                 .board
                 .get(x)
-                .context(format!("X value of {} is off the grid", &x))?;
+                .context(format!("X value of ({} {}) is off the grid", &x, &y))?;
 
             let target_block = row
                 .get(y)
