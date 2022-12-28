@@ -26,11 +26,11 @@ impl Game {
         for (x, y) in self.falling_piece.iter_blocks() {
             let row = self
                 .board
-                .get(x)
+                .get(x as usize)
                 .context(format!("X value of ({} {}) is off the grid", &x, &y))?;
 
             let target_block = row
-                .get(y)
+                .get(y as usize)
                 .context(format!("Block with ({} {}) is off the grid", &x, &y))?;
 
             let is_colliding = target_block != &BlockType::None;
@@ -58,7 +58,7 @@ impl Game {
         if self
             .falling_piece
             .iter_blocks()
-            .any(|(x, _)| x == self.width - 1)
+            .any(|(x, _)| x == self.width as i32 - 1)
         {
             return;
         }
