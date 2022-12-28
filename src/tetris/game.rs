@@ -55,13 +55,15 @@ impl Game {
         }
     }
     pub fn go_right(&mut self) {
-        for (_, x) in self.falling_piece.iter_blocks() {
-            if x == self.width - 1 {
-                return;
-            }
+        if self.falling_piece.anchor_point.0 == self.board.len()-1 {
+            return;
         }
 
         self.falling_piece.anchor_point.0 += 1;
+
+        if self.is_colliding().unwrap() {
+            self.falling_piece.anchor_point.0 -= 1;
+        }
     }
     pub fn fall_by_one(&mut self) {
         todo!()
@@ -123,6 +125,43 @@ mod tests {
 
         let piece_positions = game.falling_piece.clone();
         game.go_left();
+
+        // only one pair of blocks colided but there should be no change after the move
+        for (pos1, pos2) in piece_positions
+            .iter_blocks()
+            .zip(game.falling_piece.iter_blocks())
+        {
+            assert_eq!(pos1, pos2);
+        }
+    }
+
+    #[test]
+    fn test_move_right() {
+        let mut game = GameBuilder::new(10, 20)
+            .add_blocks(
+                vec![(9, 0), (9, 1), (9, 2), (8, 0), (8, 1), (7, 0)],
+                BlockType::IShape,
+            )
+            .set_falling_piece(Piece {
+                block_type: BlockType::OShape,
+                anchor_point: (6, 1),
+                blocks: vec![(0, 0), (0, 1)],
+            })
+            .compile();
+
+        // it should move left as usual (there is free space)
+        let piece_positions = game.falling_piece.clone();
+        game.go_right();
+
+        for (pos1, pos2) in piece_positions
+            .iter_blocks()
+            .zip(game.falling_piece.iter_blocks())
+        {
+            assert_ne!(pos1, pos2);
+        }
+
+        let piece_positions = game.falling_piece.clone();
+        game.go_right();
 
         // only one pair of blocks colided but there should be no change after the move
         for (pos1, pos2) in piece_positions
