@@ -70,7 +70,15 @@ impl Game {
         }
     }
     pub fn fall_by_one(&mut self) {
-        todo!()
+        if self.falling_piece.iter_blocks().any(|(_, y)| y == 0) {
+            return;
+        }
+
+        self.falling_piece.anchor_point.1 -= 1;
+
+        if self.is_colliding().unwrap() {
+            self.falling_piece.anchor_point.1 += 1;
+        }
     }
 
     pub fn drop(&mut self) {
@@ -209,6 +217,76 @@ mod tests {
 
         let piece_positions = game.falling_piece.clone();
         game.go_right();
+
+        for (pos1, pos2) in piece_positions
+            .iter_blocks()
+            .zip(game.falling_piece.iter_blocks())
+        {
+            assert_eq!(pos1, pos2);
+        }
+    }
+
+    #[test]
+    fn test_fall_by_one() {
+        let mut game = GameBuilder::new(10, 20)
+            .set_falling_piece(Piece {
+                block_type: BlockType::OShape,
+                anchor_point: (0, 4),
+                blocks: vec![(0, 0), (0, 1)],
+            })
+            .compile();
+
+        for _ in 0..4 {
+            let piece_positions = game.falling_piece.clone();
+            game.fall_by_one();
+
+            for (pos1, pos2) in piece_positions
+                .iter_blocks()
+                .zip(game.falling_piece.iter_blocks())
+            {
+                assert_ne!(pos1, pos2);
+            }
+        }
+
+        let piece_positions = game.falling_piece.clone();
+        game.fall_by_one();
+
+        for (pos1, pos2) in piece_positions
+            .iter_blocks()
+            .zip(game.falling_piece.iter_blocks())
+        {
+            assert_eq!(pos1, pos2);
+        }
+    }
+
+    #[test]
+    fn test_fall_by_one_block_collision() {
+        let mut game = GameBuilder::new(10, 20)
+            .set_falling_piece(Piece {
+                block_type: BlockType::OShape,
+                anchor_point: (1, 4),
+                blocks: vec![(0, 0), (0, 1)],
+            })
+            .add_blocks(
+                vec![(0, 0), (0, 1), (1, 0), (2, 0), (2, 1), (2, 2)],
+                BlockType::IShape,
+            )
+            .compile();
+
+        for _ in 0..3 {
+            let piece_positions = game.falling_piece.clone();
+            game.fall_by_one();
+
+            for (pos1, pos2) in piece_positions
+                .iter_blocks()
+                .zip(game.falling_piece.iter_blocks())
+            {
+                assert_ne!(pos1, pos2);
+            }
+        }
+
+        let piece_positions = game.falling_piece.clone();
+        game.fall_by_one();
 
         for (pos1, pos2) in piece_positions
             .iter_blocks()
