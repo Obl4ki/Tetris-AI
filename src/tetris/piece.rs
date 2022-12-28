@@ -46,11 +46,34 @@ pub fn get_l(x: usize, y: usize) -> Piece {
     }
 }
 
-
 pub fn get_j(x: usize, y: usize) -> Piece {
     Piece {
         block_type: BlockType::IShape,
         anchor_point: (x as i32, y as i32),
         blocks: vec![(0, 0), (0, 1), (0, 2), (-1, 0)],
+    }
+}
+
+pub fn get_z(x: usize, y: usize) -> Piece {
+    Piece {
+        block_type: BlockType::IShape,
+        anchor_point: (x as i32, y as i32),
+        blocks: vec![(0, 0), (0, 1), (-1, 1), (1, 0)],
+    }
+}
+
+pub fn get_s(x: usize, y: usize) -> Piece {
+    Piece {
+        block_type: BlockType::IShape,
+        anchor_point: (x as i32, y as i32),
+        blocks: vec![(0, 0), (-1, 0), (0, 1), (1, 1)],
+    }
+}
+
+pub fn get_t(x: usize, y: usize) -> Piece {
+    Piece {
+        block_type: BlockType::IShape,
+        anchor_point: (x as i32, y as i32),
+        blocks: vec![(0, 0), (-1, 0), (1, 0), (0, 1)],
     }
 }
