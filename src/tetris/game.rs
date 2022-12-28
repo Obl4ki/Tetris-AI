@@ -44,7 +44,7 @@ impl Game {
     }
 
     pub fn go_left(&mut self) {
-        if self.falling_piece.anchor_point.0 == 0 {
+        if self.falling_piece.iter_blocks().any(|(x, _)| x == 0) {
             return;
         }
 
@@ -55,7 +55,11 @@ impl Game {
         }
     }
     pub fn go_right(&mut self) {
-        if self.falling_piece.anchor_point.0 == self.board.len()-1 {
+        if self
+            .falling_piece
+            .iter_blocks()
+            .any(|(x, _)| x == self.width - 1)
+        {
             return;
         }
 
@@ -99,7 +103,7 @@ mod tests {
     }
 
     #[test]
-    fn test_move_left() {
+    fn test_move_left_block_collision() {
         let mut game = GameBuilder::new(10, 20)
             .add_blocks(
                 vec![(0, 0), (1, 0), (2, 0), (1, 0), (1, 1), (2, 0)],
@@ -136,7 +140,7 @@ mod tests {
     }
 
     #[test]
-    fn test_move_right() {
+    fn test_move_right_block_collision() {
         let mut game = GameBuilder::new(10, 20)
             .add_blocks(
                 vec![(9, 0), (9, 1), (9, 2), (8, 0), (8, 1), (7, 0)],
@@ -164,6 +168,48 @@ mod tests {
         game.go_right();
 
         // only one pair of blocks colided but there should be no change after the move
+        for (pos1, pos2) in piece_positions
+            .iter_blocks()
+            .zip(game.falling_piece.iter_blocks())
+        {
+            assert_eq!(pos1, pos2);
+        }
+    }
+
+    #[test]
+    fn test_left_board_margin_collision() {
+        let mut game = GameBuilder::new(10, 20)
+            .set_falling_piece(Piece {
+                block_type: BlockType::OShape,
+                anchor_point: (0, 0),
+                blocks: vec![(0, 0), (0, 1)],
+            })
+            .compile();
+
+        let piece_positions = game.falling_piece.clone();
+        game.go_left();
+
+        for (pos1, pos2) in piece_positions
+            .iter_blocks()
+            .zip(game.falling_piece.iter_blocks())
+        {
+            assert_eq!(pos1, pos2);
+        }
+    }
+
+    #[test]
+    fn test_right_board_margin_collision() {
+        let mut game = GameBuilder::new(10, 20)
+            .set_falling_piece(Piece {
+                block_type: BlockType::OShape,
+                anchor_point: (9, 0),
+                blocks: vec![(0, 0), (0, 1)],
+            })
+            .compile();
+
+        let piece_positions = game.falling_piece.clone();
+        game.go_right();
+
         for (pos1, pos2) in piece_positions
             .iter_blocks()
             .zip(game.falling_piece.iter_blocks())
