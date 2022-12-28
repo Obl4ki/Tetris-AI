@@ -85,13 +85,19 @@ impl Game {
         todo!()
     }
 
-    pub fn rotate_cw(&mut self) {}
+    pub fn rotate_cw(&mut self) {
+        self.falling_piece.rotate();
+    }
 
-    pub fn rotate_ccw(&mut self) {}
+    pub fn rotate_ccw(&mut self) {
+        self.falling_piece.rotate_ccw();
+    }
 }
 
 #[cfg(test)]
 mod tests {
+    use std::collections::VecDeque;
+
     use super::*;
     use crate::tetris::builders::GameBuilder;
 
@@ -104,6 +110,8 @@ mod tests {
                 block_type: BlockType::OShape,
                 anchor_point: (0, 0),
                 blocks: vec![(0, 2), (1, 2), (2, 2)],
+                rotation_offset_queue: vec![(0, 0)],
+                rotation_offset: 0,
             })
             .compile();
 
@@ -121,6 +129,8 @@ mod tests {
                 block_type: BlockType::OShape,
                 anchor_point: (4, 0),
                 blocks: vec![(0, 0), (0, 1)],
+                rotation_offset_queue: vec![(0, 0)],
+                rotation_offset: 0,
             })
             .compile();
 
@@ -158,6 +168,8 @@ mod tests {
                 block_type: BlockType::OShape,
                 anchor_point: (6, 1),
                 blocks: vec![(0, 0), (0, 1)],
+                rotation_offset_queue: vec![(0, 0)],
+                rotation_offset: 0,
             })
             .compile();
 
@@ -191,6 +203,8 @@ mod tests {
                 block_type: BlockType::OShape,
                 anchor_point: (0, 0),
                 blocks: vec![(0, 0), (0, 1)],
+                rotation_offset_queue: vec![(0, 0)],
+                rotation_offset: 0,
             })
             .compile();
 
@@ -212,6 +226,8 @@ mod tests {
                 block_type: BlockType::OShape,
                 anchor_point: (9, 0),
                 blocks: vec![(0, 0), (0, 1)],
+                rotation_offset_queue: vec![(0, 0)],
+                rotation_offset: 0,
             })
             .compile();
 
@@ -233,6 +249,8 @@ mod tests {
                 block_type: BlockType::OShape,
                 anchor_point: (0, 4),
                 blocks: vec![(0, 0), (0, 1)],
+                rotation_offset_queue: vec![(0, 0)],
+                rotation_offset: 0,
             })
             .compile();
 
@@ -266,6 +284,8 @@ mod tests {
                 block_type: BlockType::OShape,
                 anchor_point: (1, 4),
                 blocks: vec![(0, 0), (0, 1)],
+                rotation_offset_queue: vec![(0, 0)],
+                rotation_offset: 0,
             })
             .add_blocks(
                 vec![(0, 0), (0, 1), (1, 0), (2, 0), (2, 1), (2, 2)],
