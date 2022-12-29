@@ -47,8 +47,8 @@ fn draw_game_state(mut commands: Commands, game: ResMut<TetrisGameResource>) {
     }
 
     //draw falling piece
-    for (x, y) in game.falling_piece.iter_blocks() {
-        let color = get_color_of_block_type(game.falling_piece.block_type);
+    for (x, y, block_type) in game.iter_piece_blocks() {
+        let color = get_color_of_block_type(block_type);
         draw_rectangle(
             &mut commands,
             color,

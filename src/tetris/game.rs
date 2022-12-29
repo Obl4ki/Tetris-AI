@@ -28,6 +28,10 @@ impl Game {
             .map(|(x, y)| (x, y, self.board[x][y]))
     }
 
+    pub fn iter_piece_blocks(&self) -> impl Iterator<Item = (i32, i32, BlockType)> + '_ {
+        self.falling_piece.iter_blocks().map(|(x, y)| (x, y, self.falling_piece.block_type))
+    }
+
     /// Piece-Piece collision checker for SRS algorithm.
     pub fn is_colliding(&self) -> Result<bool> {
         for (x, y) in self.falling_piece.iter_blocks() {

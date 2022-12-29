@@ -9,7 +9,7 @@ lazy_static! {
         vec![get_o, get_i, get_s, get_z, get_l, get_j, get_t];
 }
 
-fn get_random_falling_piece() -> Piece {
+pub fn get_random_falling_piece() -> Piece {
     let mut rng = thread_rng();
     let get_piece = ALL_PIECES_GETTERS.choose(&mut rng).unwrap();
     get_piece(4, 16)

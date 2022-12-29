@@ -4,8 +4,7 @@ use crate::tetris::blocks::BlockType;
 use crate::tetris::game::Game;
 use crate::tetris::piece::Piece;
 
-use crate::tetris::piece::get_i;
-
+use crate::tetris::piece::{get_i, get_random_falling_piece};
 pub struct GameBuilder {
     data: Vec<Vec<BlockType>>,
     width: usize,
@@ -45,9 +44,4 @@ impl GameBuilder {
             height: self.height,
         }
     }
-}
-
-fn get_random_falling_piece() -> Piece {
-    // TODO implement this properly
-    get_i(4, 18)
 }
