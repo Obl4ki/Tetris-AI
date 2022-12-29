@@ -2,7 +2,6 @@
 extern crate lazy_static;
 
 use bevy::prelude::*;
-use itertools::Itertools;
 mod tetris;
 use tetris::blocks::BlockType;
 use tetris::game::Game;
