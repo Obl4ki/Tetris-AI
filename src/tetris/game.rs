@@ -2,6 +2,7 @@ use crate::tetris::blocks::BlockType;
 use crate::tetris::piece::Piece;
 use crate::tetris::piece::{get_i, get_o};
 use anyhow::{Context, Result};
+use itertools::Itertools;
 
 #[derive(Debug)]
 pub struct Game {
@@ -19,6 +20,12 @@ impl Game {
             width,
             height,
         }
+    }
+
+    pub fn iter_board(&self) -> impl Iterator<Item = (usize, usize, BlockType)> + '_ {
+        (0..self.width)
+            .cartesian_product(0..self.height)
+            .map(|(x, y)| (x, y, self.board[x][y]))
     }
 
     /// Piece-Piece collision checker for SRS algorithm.

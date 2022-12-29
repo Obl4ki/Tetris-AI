@@ -34,14 +34,10 @@ fn setup_system(mut commands: Commands) {
     commands.spawn(Camera2dBundle::default());
 }
 
-fn draw_game_state(mut commands: Commands, mut game: ResMut<TetrisGameResource>) {
-    let width = game.width;
-    let height = game.height;
-    game.board[0][0] = BlockType::IShape;
-    game.board[0][1] = BlockType::IShape;
-    for (x, y) in (0..width).cartesian_product(0..height) {
-        let val = game.board[x][y];
-        let color = get_color_of_block_type(val);
+fn draw_game_state(mut commands: Commands, game: ResMut<TetrisGameResource>) {
+    for (x, y, block) in game.iter_board() {
+        let color = get_color_of_block_type(block);
+
         draw_rectangle(
             &mut commands,
             color,
