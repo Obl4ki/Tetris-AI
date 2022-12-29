@@ -1,3 +1,6 @@
+#[macro_use]
+extern crate lazy_static;
+
 use bevy::prelude::*;
 use itertools::Itertools;
 mod tetris;
@@ -6,6 +9,10 @@ use tetris::game::Game;
 
 const BLOCK_SIZE: f32 = 20.;
 const GLOBAL_OFFSET: f32 = -200.;
+
+mod tetris_game_resource;
+use tetris_game_resource::TetrisGameResource;
+
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
@@ -16,18 +23,18 @@ fn main() {
             230. / 255.,
         )))
         .insert_resource(Msaa { samples: 4 })
-        .insert_resource(bevy::window::close_on_esc)
-        .insert_resource(Game::new(10, 20))
+        .add_system(bevy::window::close_on_esc)
+        .insert_resource(TetrisGameResource(Game::new(10, 20)))
         .add_system(draw_game_state)
         .add_system(keyboard_handling)
         .run();
 }
 
 fn setup_system(mut commands: Commands) {
-    commands.spawn_bundle(Camera2dBundle::default());
+    commands.spawn(Camera2dBundle::default());
 }
 
-fn draw_game_state(mut commands: Commands, mut game: ResMut<Game>) {
+fn draw_game_state(mut commands: Commands, mut game: ResMut<TetrisGameResource>) {
     let width = game.width;
     let height = game.height;
     game.board[0][0] = BlockType::IShape;
@@ -69,7 +76,7 @@ fn get_color_of_block_type(val: BlockType) -> Color {
 }
 
 fn draw_rectangle(commands: &mut Commands, color: Color, x: f32, y: f32) {
-    commands.spawn_bundle(SpriteBundle {
+    commands.spawn(SpriteBundle {
         sprite: Sprite {
             color,
             custom_size: Some(Vec2::new(20.0, 20.0)),
@@ -80,7 +87,7 @@ fn draw_rectangle(commands: &mut Commands, color: Color, x: f32, y: f32) {
     });
 }
 
-fn keyboard_handling(keyboard: Res<Input<KeyCode>>, mut game: ResMut<Game>) {
+fn keyboard_handling(keyboard: Res<Input<KeyCode>>, mut game: ResMut<TetrisGameResource>) {
     if keyboard.just_pressed(KeyCode::Space) {
         game.drop();
     }

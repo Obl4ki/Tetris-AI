@@ -1,12 +1,18 @@
-use std::collections::VecDeque;
-
 use super::blocks::BlockType;
-
+use anyhow::Result;
+use rand::seq::SliceRandom;
+use rand::thread_rng;
 type Coord = (i32, i32);
 
+lazy_static! {
+    static ref ALL_PIECES_GETTERS: Vec<fn(usize, usize) -> Piece> =
+        vec![get_o, get_i, get_s, get_z, get_l, get_j, get_t];
+}
+
 fn get_random_falling_piece() -> Piece {
-    // TODO implement this properly
-    get_i(4, 18)
+    let mut rng = thread_rng();
+    let get_piece = ALL_PIECES_GETTERS.choose(&mut rng).unwrap();
+    get_piece(4, 16)
 }
 
 #[derive(Debug, Clone)]
@@ -144,7 +150,7 @@ mod tests {
     fn test_o_rotation_compensation() {
         let mut o_piece = get_o(4, 16);
 
-        for i in 0..4 {
+        for _ in 0..4 {
             let old_piece = o_piece.clone();
             o_piece.rotate();
 
