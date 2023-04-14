@@ -1,5 +1,6 @@
 [workspace]
 members = ["tetris-bin", "tetris-core", "tests"]
+resolver = "2"
 
 # Enable only a small amount of optimization in debug mode
 [profile.dev]

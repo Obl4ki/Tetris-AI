@@ -1,5 +1,4 @@
 use bevy::prelude::*;
-use tetris_bin::BlockType;
 use tetris_core::prelude::*;
 
 const BLOCK_SIZE: f32 = 20.;

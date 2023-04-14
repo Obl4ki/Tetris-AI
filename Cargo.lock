@@ -2768,6 +2768,9 @@ dependencies = [
 [[package]]
 name = "tests"
 version = "0.1.0"
+dependencies = [
+ "tetris-core",
+]
 
 [[package]]
 name = "tetris-bin"
