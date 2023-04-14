@@ -1,7 +1,6 @@
 use bevy::prelude::*;
-mod tetris;
-use tetris::game::Game;
-use tetris::BlockType;
+use tetris_bin::BlockType;
+use tetris_core::prelude::*;
 
 const BLOCK_SIZE: f32 = 20.;
 const GLOBAL_OFFSET: f32 = -200.;
@@ -83,7 +82,7 @@ fn draw_rectangle(commands: &mut Commands, color: Color, x: f32, y: f32) {
 
 fn keyboard_handling(keyboard: Res<Input<KeyCode>>, mut game: ResMut<TetrisGameResource>) {
     if keyboard.just_pressed(KeyCode::Space) {
-        game.drop();
+        game.hard_drop();
     }
     if keyboard.just_pressed(KeyCode::Left) {
         game.go_left();
@@ -92,7 +91,7 @@ fn keyboard_handling(keyboard: Res<Input<KeyCode>>, mut game: ResMut<TetrisGameR
         game.go_right();
     }
     if keyboard.just_pressed(KeyCode::Down) {
-        game.fall_by_one();
+        game.go_down();
     }
     if keyboard.just_pressed(KeyCode::Z) {
         game.rotate_cw();

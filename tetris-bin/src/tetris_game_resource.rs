@@ -1,7 +1,7 @@
 use bevy::prelude::Resource;
 
-use crate::tetris::game::Game;
 use std::ops::{Deref, DerefMut};
+use tetris_core::Game;
 
 #[derive(Resource)]
 pub struct TetrisGameResource(pub Game);

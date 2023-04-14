@@ -1,4 +1,4 @@
-use crate::tetris::{core_types, game};
+use crate::{core_types, game};
 
 pub trait Piece {
     fn new(anchor_point: core_types::Coord, game_visitor: &game::Game) -> Self;

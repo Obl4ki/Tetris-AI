@@ -1,6 +1,4 @@
-use crate::tetris::core_types::Coord;
-
-use super::BlockType;
+use crate::core_types::{BlockType, Coord};
 
 pub fn get_offset_table(block_type: BlockType) -> Vec<Vec<Coord>> {
     match block_type {

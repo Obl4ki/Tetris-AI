@@ -1,10 +1,10 @@
-use super::{core_types, game::Game, piece::Piece, BlockType};
-
+use crate::core_types::BlockType;
+use crate::{game::Game, piece::Piece};
 #[derive(Debug, Default, Clone, Copy)]
 pub struct GameBuilder {
     width: usize,
     height: usize,
-    block_type: Option<core_types::BlockType>,
+    block_type: Option<BlockType>,
 }
 
 impl GameBuilder {

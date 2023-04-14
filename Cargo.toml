@@ -1,19 +1,10 @@
-[package]
-name = "tetris"
-version = "0.1.0"
-edition = "2021"
+[workspace]
+members = ["tetris-bin", "tetris-core", "tests"]
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 # Enable only a small amount of optimization in debug mode
-# [profile.dev]
-# opt-level = 1
+[profile.dev]
+opt-level = 1
 
-# # Enable high optimizations for dependencies (incl. Bevy), but not for our code:
-# [profile.dev.package."*"]
-# opt-level = 3
-
-[dependencies]
-anyhow = "1.0.66"
-bevy = "0.9.1"
-itertools = "0.10.5"
-rand = "0.8.5"
+# Enable high optimizations for dependencies (incl. Bevy), but not for our code:
+[profile.dev.package."*"]
+opt-level = 3
