@@ -1,5 +1,7 @@
-use crate::core_types::BlockType;
-use crate::{game::Game, piece::Piece};
+use crate::game::Game;
+use crate::piece::Piece;
+use crate::entities::BlockType;
+
 #[derive(Debug, Default, Clone, Copy)]
 pub struct GameBuilder {
     width: usize,
@@ -19,7 +21,7 @@ impl GameBuilder {
         let board = vec![vec![None; self.height]; self.width];
         Game {
             board: board.clone(),
-            falling_piece: Piece::new(self.block_type.unwrap_or(BlockType::O), &board).unwrap(),
+            falling_piece: Piece::new(self.block_type.unwrap_or(BlockType::O)).unwrap(),
             width: self.width,
             height: self.height,
         }

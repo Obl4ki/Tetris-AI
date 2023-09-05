@@ -42,13 +42,13 @@ fn draw_game_state(mut commands: Commands, game: ResMut<TetrisGameResource>) {
     }
 
     //draw falling piece
-    for (x, y, block_type) in game.iter_piece_blocks() {
+    for (pos, block_type) in game.iter_piece_blocks() {
         let color = get_color_of_block_type(block_type);
         draw_rectangle(
             &mut commands,
             color,
-            x as f32 * BLOCK_SIZE + GLOBAL_OFFSET,
-            y as f32 * BLOCK_SIZE + GLOBAL_OFFSET,
+            pos.x as f32 * BLOCK_SIZE + GLOBAL_OFFSET,
+            pos.y as f32 * BLOCK_SIZE + GLOBAL_OFFSET,
         );
 
         // println!("{:?}, {:?}", &x, &y);

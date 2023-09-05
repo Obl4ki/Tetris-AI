@@ -1,13 +1,11 @@
-use super::{core_types, direction::Direction};
-use crate::collision::Collision;
-use crate::core_types::BlockType;
+use crate::entities::{BlockType, Collision, Coord, Direction, Board};
 use crate::piece::Piece;
 use itertools::Itertools;
 
 /// Main game struct, used to instantiate the game.
 #[derive(Debug)]
 pub struct Game {
-    pub board: Vec<Vec<Option<BlockType>>>,
+    pub board: Board,
     pub falling_piece: Piece,
     pub width: usize,
     pub height: usize,
@@ -15,10 +13,9 @@ pub struct Game {
 
 impl Game {
     pub fn new(width: usize, height: usize) -> Self {
-        let board = vec![vec![None; height]; width];
         Self {
-            board: board.clone(),
-            falling_piece: Piece::new(core_types::BlockType::Z, &board).unwrap(),
+            board: vec![vec![None; height]; width],
+            falling_piece: Piece::new(BlockType::O).unwrap(),
             width,
             height,
         }
@@ -34,20 +31,20 @@ impl Game {
             })
     }
 
-    pub fn iter_piece_blocks(&self) -> impl Iterator<Item = (i32, i32, BlockType)> + '_ {
+    pub fn iter_piece_blocks(&self) -> impl Iterator<Item = (Coord, BlockType)> + '_ {
         self.falling_piece
-            .iter_blocks(self)
-            .map(move |(x, y)| (x, y, self.falling_piece.block_type))
+            .iter_blocks()
+            .map(move |coord| (coord, self.falling_piece.block_type))
     }
 
     /// Check if after the move in the specified direction there will
     /// be any collision.
     pub fn get_collision_after_move(&self, dir: Direction) -> Collision {
-        let (dx, dy) = dir.into();
+        let dir: Coord = dir.into();
 
-        for (x, y, _) in self.iter_piece_blocks() {
-            let xx = x + dx;
-            let yy = y + dy;
+        for (pos, _) in self.iter_piece_blocks() {
+            let xx = pos.x + dir.x;
+            let yy = pos.y + dir.y;
 
             if xx < 0 {
                 return Collision::LeftBorder;
@@ -61,9 +58,9 @@ impl Game {
                 return Collision::BottomBorder;
             }
 
-            let row = self.board.get((x + dx) as usize).unwrap();
+            let row = self.board.get((pos.x + dir.x) as usize).unwrap();
 
-            let target_block = row.get((y + dy) as usize).unwrap();
+            let target_block = row.get((pos.y + dir.y) as usize).unwrap();
 
             if let Some(_block) = target_block {
                 return Collision::Block;
@@ -75,25 +72,25 @@ impl Game {
 
     pub fn go_left(&mut self) {
         if self.get_collision_after_move(Direction::Left) == Collision::None {
-            self.falling_piece.anchor_point.0 -= 1;
+            self.falling_piece.anchor_point.x -= 1;
         }
     }
 
     pub fn go_right(&mut self) {
         if self.get_collision_after_move(Direction::Right) == Collision::None {
-            self.falling_piece.anchor_point.0 += 1;
+            self.falling_piece.anchor_point.x += 1;
         }
     }
 
     pub fn go_down(&mut self) {
         if self.get_collision_after_move(Direction::Down) == Collision::None {
-            self.falling_piece.anchor_point.1 -= 1;
+            self.falling_piece.anchor_point.y -= 1;
         }
     }
 
     pub fn hard_drop(&mut self) {
         while self.get_collision_after_move(Direction::Down) == Collision::None {
-            self.falling_piece.anchor_point.1 -= 1;
+            self.falling_piece.anchor_point.y -= 1;
         }
     }
 

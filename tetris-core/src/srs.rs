@@ -1,7 +1,7 @@
-use crate::core_types::{BlockType, Coord};
+use crate::entities::{BlockType, Coord};
 
 pub fn get_offset_table(block_type: BlockType) -> Vec<Vec<Coord>> {
-    match block_type {
+    let table = match block_type {
         BlockType::I => vec![
             vec![(0, 0), (-1, 0), (-1, 1), (0, 1)],
             vec![(-1, 0), (0, 0), (1, 1), (0, 1)],
@@ -17,5 +17,10 @@ pub fn get_offset_table(block_type: BlockType) -> Vec<Vec<Coord>> {
             vec![(0, 0), (0, 2), (0, 0), (0, 2)],
             vec![(0, 0), (1, 2), (0, 0), (-1, 2)],
         ],
-    }
+    };
+
+    table
+        .into_iter()
+        .map(|r| r.into_iter().map(Coord::from).collect())
+        .collect()
 }
