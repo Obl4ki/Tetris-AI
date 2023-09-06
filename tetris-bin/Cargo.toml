@@ -4,5 +4,12 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-bevy = "0.9"
+bevy = { version = "0.11.2", default-features = false, features = [
+    # strip bevy to bare minimum
+    "bevy_core_pipeline",
+    "bevy_render",
+    "bevy_sprite",
+    "bevy_winit",
+    "dynamic_linking",
+] }
 tetris-core = { path = "../tetris-core" }

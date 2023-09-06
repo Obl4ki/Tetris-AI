@@ -1,23 +1,22 @@
-// 
+use num::Integer;
+
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
-pub struct Coord {
-    pub x: i32,
-    pub y: i32,
+pub struct Coord<I: Integer> {
+    pub x: I,
+    pub y: I,
 }
 
-impl Coord {
-    pub fn new(x: i32, y: i32) -> Self {
+impl<I: Integer> Coord<I> {
+    pub fn new(x: I, y: I) -> Self {
         Self { x, y }
     }
 }
 
-impl From<(i32, i32)> for Coord {
-    fn from((x, y): (i32, i32)) -> Self {
+impl<I: Integer> From<(I, I)> for Coord<I> {
+    fn from((x, y): (I, I)) -> Self {
         Self::new(x, y)
     }
 }
-
-pub type Board = Vec<Vec<Option<BlockType>>>;
 
 #[derive(Clone, Copy, PartialEq, Debug)]
 pub enum BlockType {
@@ -38,7 +37,7 @@ pub enum Direction {
     Down,
 }
 
-impl From<Direction> for Coord {
+impl From<Direction> for Coord<i32> {
     fn from(value: Direction) -> Self {
         match value {
             Direction::Left => Coord::new(-1, 0),

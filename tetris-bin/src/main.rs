@@ -5,53 +5,50 @@ const BLOCK_SIZE: f32 = 20.;
 const GLOBAL_OFFSET: f32 = -200.;
 
 mod tetris_game_resource;
+use bevy::core_pipeline::prelude::ClearColor;
 use tetris_game_resource::TetrisGameResource;
-
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
-        .add_startup_system(setup_system)
+        .add_systems(Startup, setup)
         .insert_resource(ClearColor(Color::rgb(
             173. / 255.,
             216. / 255.,
             230. / 255.,
         )))
-        .insert_resource(Msaa { samples: 4 })
-        .add_system(bevy::window::close_on_esc)
+        .insert_resource(Msaa::Sample4)
         .insert_resource(TetrisGameResource(Game::new(10, 20)))
-        .add_system_to_stage(CoreStage::PreUpdate, draw_background)
-        .add_system(draw_game_state)
-        .add_system(keyboard_handling)
-        .run();
+        .add_systems(PreUpdate, draw_background)
+        .add_systems(PreUpdate, bevy::window::close_on_esc)
+        .add_systems(Update, draw_game_state)
+        .add_systems(Update, keyboard_handling)
+        .run()
 }
 
-fn setup_system(mut commands: Commands) {
+fn setup(mut commands: Commands) {
     commands.spawn(Camera2dBundle::default());
 }
 
 fn draw_game_state(mut commands: Commands, game: ResMut<TetrisGameResource>) {
-    for (x, y, block) in game.iter_board() {
+    for (pos, block) in game.board.iter_blocks() {
         let color = get_color_of_block_type(block);
 
         draw_rectangle(
             &mut commands,
             color,
-            x as f32 * BLOCK_SIZE + GLOBAL_OFFSET,
-            y as f32 * BLOCK_SIZE + GLOBAL_OFFSET,
+            pos.x as f32 * BLOCK_SIZE + GLOBAL_OFFSET,
+            pos.y as f32 * BLOCK_SIZE + GLOBAL_OFFSET,
         )
     }
 
-    //draw falling piece
-    for (pos, block_type) in game.iter_piece_blocks() {
-        let color = get_color_of_block_type(block_type);
+    for pos in game.piece.iter_blocks() {
+        let color = get_color_of_block_type(game.piece.block_type);
         draw_rectangle(
             &mut commands,
             color,
             pos.x as f32 * BLOCK_SIZE + GLOBAL_OFFSET,
             pos.y as f32 * BLOCK_SIZE + GLOBAL_OFFSET,
         );
-
-        // println!("{:?}, {:?}", &x, &y);
     }
 }
 

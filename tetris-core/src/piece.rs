@@ -3,13 +3,13 @@ use crate::entities::{BlockType, Coord};
 #[derive(Debug, Clone)]
 pub struct Piece {
     pub block_type: BlockType,
-    pub anchor_point: Coord,
-    pub blocks: Vec<Coord>,
+    pub anchor_point: Coord<usize>,
+    pub blocks: Vec<Coord<i32>>,
     pub rotation_idx: usize,
 }
 
 /// Every block is represented as a Coordinate relative to the anchor point.
-fn _get_blocks(block_type: BlockType) -> Vec<Coord> {
+fn _get_blocks(block_type: BlockType) -> Vec<Coord<i32>> {
     match block_type {
         BlockType::I => vec![(0, -1), (0, 0), (0, 1), (0, 2)],
         BlockType::O => vec![(0, 0), (0, 1), (1, 0), (1, 1)],
@@ -36,9 +36,12 @@ impl Piece {
         })
     }
 
-    pub fn iter_blocks(&self) -> impl Iterator<Item = Coord> + '_ {
+    pub fn iter_blocks(&self) -> impl Iterator<Item = Coord<i32>> + '_ {
         self.blocks.iter().map(move |Coord { x, y }| {
-            Coord::new(*x + self.anchor_point.x, *y + self.anchor_point.y)
+            Coord::new(
+                *x + self.anchor_point.x as i32,
+                *y + self.anchor_point.y as i32,
+            )
         })
     }
 
