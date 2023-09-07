@@ -53,11 +53,14 @@ impl Piece {
         self._rotate(false)
     }
 
+    const CLOCKWISE_ROT: [[i32; 2]; 2] = [[0, -1], [1, 0]];
+    const COUNTER_CLOCKWISE_ROT: [[i32; 2]; 2] = [[0, 1], [-1, 0]];
+
     fn _rotate(&mut self, clockwise: bool) {
         let r = if clockwise {
-            vec![vec![0, -1], vec![1, 0]]
+            Self::CLOCKWISE_ROT
         } else {
-            vec![vec![0, 1], vec![-1, 0]]
+            Self::COUNTER_CLOCKWISE_ROT
         };
 
         for piece in &mut self.blocks {
