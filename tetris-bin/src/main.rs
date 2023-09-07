@@ -7,6 +7,7 @@ const GLOBAL_OFFSET: f32 = -200.;
 mod tetris_game_resource;
 use bevy::core_pipeline::prelude::ClearColor;
 use tetris_game_resource::TetrisGameResource;
+
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
@@ -17,9 +18,10 @@ fn main() {
             230. / 255.,
         )))
         .insert_resource(Msaa::Sample4)
-        .insert_resource(TetrisGameResource(Game::new(10, 20)))
-        .add_systems(PreUpdate, draw_background)
+        .insert_resource(TetrisGameResource(Game::new()))
         .add_systems(PreUpdate, bevy::window::close_on_esc)
+        .add_systems(PreUpdate, draw_background)
+        .add_systems(PreUpdate, despawn_all_blocks)
         .add_systems(Update, draw_game_state)
         .add_systems(Update, keyboard_handling)
         .run()
@@ -27,6 +29,12 @@ fn main() {
 
 fn setup(mut commands: Commands) {
     commands.spawn(Camera2dBundle::default());
+}
+
+fn despawn_all_blocks(mut commands: Commands, query: Query<Entity, With<Sprite>>) {
+    for entity in query.iter() {
+        commands.entity(entity).despawn();
+    }
 }
 
 fn draw_game_state(mut commands: Commands, game: ResMut<TetrisGameResource>) {

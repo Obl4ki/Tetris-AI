@@ -1,3 +1,4 @@
+use anyhow::Result;
 use num::Integer;
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
@@ -15,6 +16,22 @@ impl<I: Integer> Coord<I> {
 impl<I: Integer> From<(I, I)> for Coord<I> {
     fn from((x, y): (I, I)) -> Self {
         Self::new(x, y)
+    }
+}
+
+impl TryFrom<Coord<i32>> for Coord<usize> {
+    type Error = anyhow::Error;
+
+    fn try_from(value: Coord<i32>) -> Result<Self, Self::Error> {
+        let x = value.x.try_into()?;
+        let y = value.y.try_into()?;
+        Ok(Coord::new(x, y))
+    }
+}
+
+impl From<Coord<usize>> for Coord<i32> {
+    fn from(value: Coord<usize>) -> Self {
+        Coord::new(value.x as i32, value.y as i32)
     }
 }
 

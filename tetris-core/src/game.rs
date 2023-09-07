@@ -12,13 +12,17 @@ pub struct Game {
 }
 
 impl Game {
-    pub fn new(width: usize, height: usize) -> Self {
+    pub fn new() -> Self {
         Self {
             board: Board::new(),
             piece: Piece::new(BlockType::O).unwrap(),
-            width,
-            height,
+            width: 10,
+            height: 20,
         }
+    }
+
+    pub fn reload_piece(&mut self) {
+        self.piece = Piece::new(BlockType::I).unwrap()
     }
 
     /// Check if after the move in the specified direction there will
@@ -67,6 +71,9 @@ impl Game {
     pub fn go_down(&mut self) {
         if self.get_collision_after_move(Direction::Down) == Collision::None {
             self.piece.anchor_point.y -= 1;
+        } else {
+            self.set_piece_blocks_into_board();
+            self.reload_piece();
         }
     }
 
@@ -74,6 +81,9 @@ impl Game {
         while self.get_collision_after_move(Direction::Down) == Collision::None {
             self.piece.anchor_point.y -= 1;
         }
+        // map the blocks from piece into the board
+        self.set_piece_blocks_into_board();
+        self.reload_piece();
     }
 
     pub fn rotate_cw(&mut self) {
@@ -82,5 +92,20 @@ impl Game {
 
     pub fn rotate_ccw(&mut self) {
         self.piece.rotate_ccw();
+    }
+
+    fn set_piece_blocks_into_board(&mut self) {
+        for piece_coords in self.piece.iter_blocks() {
+            self.board.set(
+                Some(self.piece.block_type),
+                piece_coords.try_into().unwrap(),
+            );
+        }
+    }
+}
+
+impl Default for Game {
+    fn default() -> Self {
+        Self::new()
     }
 }

@@ -67,18 +67,21 @@ impl Piece {
             piece.y = new_y_pos;
         }
 
-        // TODO: Refactor this mess
-
-        if clockwise {
-            if self.rotation_idx == 3 {
-                self.rotation_idx = 0;
-            } else {
-                self.rotation_idx += 1;
+        match clockwise {
+            true => {
+                if self.rotation_idx == 3 {
+                    self.rotation_idx = 0;
+                } else {
+                    self.rotation_idx += 1;
+                }
             }
-        } else if self.rotation_idx == 0 {
-            self.rotation_idx = 3;
-        } else {
-            self.rotation_idx -= 1;
+            false => {
+                if self.rotation_idx == 0 {
+                    self.rotation_idx = 3;
+                } else {
+                    self.rotation_idx -= 1;
+                }
+            }
         }
     }
 }
