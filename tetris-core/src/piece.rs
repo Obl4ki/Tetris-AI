@@ -1,23 +1,23 @@
-use crate::entities::{BlockType, Coord};
+use crate::entities::{PieceType, Coord};
 
 #[derive(Debug, Clone)]
 pub struct Piece {
-    pub block_type: BlockType,
+    pub block_type: PieceType,
     pub anchor_point: Coord<usize>,
     pub blocks: Vec<Coord<i32>>,
     pub rotation_idx: usize,
 }
 
 /// Every block is represented as a Coordinate relative to the anchor point.
-fn _get_blocks(block_type: BlockType) -> Vec<Coord<i32>> {
+fn _get_blocks(block_type: PieceType) -> Vec<Coord<i32>> {
     match block_type {
-        BlockType::I => vec![(0, -1), (0, 0), (0, 1), (0, 2)],
-        BlockType::O => vec![(0, 0), (0, 1), (1, 0), (1, 1)],
-        BlockType::T => vec![(0, 0), (-1, 0), (1, 0), (0, 1)],
-        BlockType::S => vec![(0, 0), (-1, 0), (0, 1), (1, 1)],
-        BlockType::Z => vec![(0, 0), (0, 1), (-1, 1), (1, 0)],
-        BlockType::J => vec![(0, 0), (0, 1), (0, 2), (-1, 0)],
-        BlockType::L => vec![(0, 0), (0, 1), (0, 2), (1, 0)],
+        PieceType::I => vec![(0, -1), (0, 0), (0, 1), (0, 2)],
+        PieceType::O => vec![(0, 0), (0, 1), (1, 0), (1, 1)],
+        PieceType::T => vec![(0, 0), (-1, 0), (1, 0), (0, 1)],
+        PieceType::S => vec![(0, 0), (-1, 0), (0, 1), (1, 1)],
+        PieceType::Z => vec![(0, 0), (0, 1), (-1, 1), (1, 0)],
+        PieceType::J => vec![(0, 0), (0, 1), (0, 2), (-1, 0)],
+        PieceType::L => vec![(0, 0), (0, 1), (0, 2), (1, 0)],
     }
     .into_iter()
     .map(Coord::from)
@@ -25,7 +25,7 @@ fn _get_blocks(block_type: BlockType) -> Vec<Coord<i32>> {
 }
 
 impl Piece {
-    pub fn new(block_type: BlockType) -> Option<Self> {
+    pub fn new(block_type: PieceType) -> Option<Self> {
         let anchor_point = Coord::new(4, 16);
 
         Some(Self {

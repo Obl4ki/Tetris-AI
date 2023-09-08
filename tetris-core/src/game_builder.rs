@@ -1,29 +1,28 @@
-// use crate::game::Game;
-// use crate::piece::Piece;
-// use crate::entities::BlockType;
+use crate::board::Board;
+use crate::entities::{Coord, PieceType};
+use crate::game::Game;
 
-// #[derive(Debug, Default, Clone, Copy)]
-// pub struct GameBuilder {
-//     width: usize,
-//     height: usize,
-//     block_type: Option<BlockType>,
-// }
+#[derive(Debug, Default, Clone)]
+pub struct GameBuilder {
+    board: Board<10, 20>,
+}
 
-// impl GameBuilder {
-//     pub fn new(width: usize, height: usize) -> Self {
-//         Self {
-//             width,
-//             height,
-//             block_type: None,
-//         }
-//     }
-//     pub fn build(self) -> Game {
-//         let board = vec![vec![None; self.height]; self.width];
-//         Game {
-//             board: board.clone(),
-//             falling_piece: Piece::new(self.block_type.unwrap_or(BlockType::O)).unwrap(),
-//             width: self.width,
-//             height: self.height,
-//         }
-//     }
-// }
+impl GameBuilder {
+    pub fn new() -> Self {
+        Self {
+            board: Board::new(),
+        }
+    }
+
+    pub fn add_piece(mut self, piece: PieceType, coord: Coord<usize>) -> Self {
+        self.board.set(Some(piece), coord);
+        self
+    }
+
+    pub fn build(self) -> Game {
+        let mut game = Game::new();
+        game.board = self.board;
+
+        game
+    }
+}

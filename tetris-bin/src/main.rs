@@ -60,15 +60,15 @@ fn draw_game_state(mut commands: Commands, game: ResMut<TetrisGameResource>) {
     }
 }
 
-fn get_color_of_block_type(val: BlockType) -> Color {
+fn get_color_of_block_type(val: PieceType) -> Color {
     match val {
-        BlockType::I => Color::rgb(0., 0., 1.),
-        BlockType::O => Color::rgb(1., 1., 0.),
-        BlockType::T => Color::rgb(0.5, 0., 0.5),
-        BlockType::S => Color::rgb(0., 0.5, 0.),
-        BlockType::Z => Color::rgb(1., 0., 0.),
-        BlockType::J => Color::rgb(0., 0., 1.),
-        BlockType::L => Color::rgb(1., 0.5, 0.),
+        PieceType::I => Color::rgb(0., 0., 1.),
+        PieceType::O => Color::rgb(1., 1., 0.),
+        PieceType::T => Color::rgb(0.5, 0., 0.5),
+        PieceType::S => Color::rgb(0., 0.5, 0.),
+        PieceType::Z => Color::rgb(1., 0., 0.),
+        PieceType::J => Color::rgb(0., 0., 1.),
+        PieceType::L => Color::rgb(1., 0.5, 0.),
     }
 }
 

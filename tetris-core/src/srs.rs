@@ -1,16 +1,16 @@
-use crate::entities::{BlockType, Coord};
+use crate::entities::{PieceType, Coord};
 
-pub fn get_offset_table(block_type: BlockType) -> Vec<Vec<Coord<i32>>> {
+pub fn get_offset_table(block_type: PieceType) -> Vec<Vec<Coord<i32>>> {
     let table = match block_type {
-        BlockType::I => vec![
+        PieceType::I => vec![
             vec![(0, 0), (-1, 0), (-1, 1), (0, 1)],
             vec![(-1, 0), (0, 0), (1, 1), (0, 1)],
             vec![(2, 0), (0, 0), (-2, 1), (0, 1)],
             vec![(-1, 0), (0, 1), (1, 0), (0, -1)],
             vec![(2, 0), (0, -2), (-2, 0), (0, 2)],
         ],
-        BlockType::O => vec![vec![(0, 0), (0, -1), (-1, -1), (-1, 0)]],
-        BlockType::T | BlockType::S | BlockType::Z | BlockType::J | BlockType::L => vec![
+        PieceType::O => vec![vec![(0, 0), (0, -1), (-1, -1), (-1, 0)]],
+        PieceType::T | PieceType::S | PieceType::Z | PieceType::J | PieceType::L => vec![
             vec![(0, 0), (0, 0), (0, 0), (0, 0)],
             vec![(0, 0), (1, 0), (0, 0), (-1, 0)],
             vec![(0, 0), (1, -1), (0, 0), (-1, -1)],

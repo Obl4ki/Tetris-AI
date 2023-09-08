@@ -1,5 +1,5 @@
 use crate::board::Board;
-use crate::entities::{BlockType, Collision, Coord, Direction};
+use crate::entities::{PieceType, Collision, Coord, Direction};
 use crate::piece::Piece;
 
 /// Main game struct, used to instantiate the game.
@@ -15,14 +15,14 @@ impl Game {
     pub fn new() -> Self {
         Self {
             board: Board::new(),
-            piece: Piece::new(BlockType::O).unwrap(),
+            piece: Piece::new(PieceType::O).unwrap(),
             width: 10,
             height: 20,
         }
     }
 
     pub fn reload_piece(&mut self) {
-        self.piece = Piece::new(BlockType::I).unwrap()
+        self.piece = Piece::new(PieceType::I).unwrap()
     }
 
     /// Check if after the move in the specified direction there will

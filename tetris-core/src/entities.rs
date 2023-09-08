@@ -36,7 +36,7 @@ impl From<Coord<usize>> for Coord<i32> {
 }
 
 #[derive(Clone, Copy, PartialEq, Debug)]
-pub enum BlockType {
+pub enum PieceType {
     I,
     O,
     T,

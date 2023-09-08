@@ -1,0 +1,7 @@
+[package]
+name = "tetris-heuristics"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tetris-core = { path = "../tetris-core" }
