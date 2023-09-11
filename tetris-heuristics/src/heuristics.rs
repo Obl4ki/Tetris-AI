@@ -9,7 +9,7 @@ fn get_cols_max_heights(state: &Game) -> [usize; 10] {
     let mut highest_blocks_x_axis = [0; 10];
 
     for (coord, _block) in state.board.iter_blocks() {
-        if dbg!(coord.y) > dbg!(highest_blocks_x_axis[coord.x]) {
+        if coord.y > highest_blocks_x_axis[coord.x] {
             highest_blocks_x_axis[coord.x] = coord.y;
         }
     }
@@ -59,11 +59,23 @@ pub fn bumpyness(state: &Game) -> HeuristicScore {
     score
 }
 
+/// Maximum minus minumum height of all the columns.
+#[must_use]
+pub fn relative_diff(state: &Game) -> HeuristicScore {
+    let heights = dbg!(get_cols_max_heights(state));
+    let max = heights.iter().max().copied().unwrap_or_default();
+    let min = heights.iter().min().copied().unwrap_or_default();
+    max - min
+}
+
 #[cfg(test)]
 mod tests {
     use tetris_core::{entities::Coord, game_builder::GameBuilder};
 
-    use crate::{heuristics::bumpyness, highest_block};
+    use crate::{
+        heuristics::{bumpyness, relative_diff},
+        highest_block,
+    };
     use tetris_core::entities::PieceType as PT;
 
     use super::get_cols_max_heights;
@@ -122,5 +134,17 @@ mod tests {
             .add_piece(PT::I, Coord::new(9, 2))
             .build();
         assert_eq!(bumpyness(&game), 12);
+    }
+
+    #[test]
+    fn test_relative_diff() {
+        let game = GameBuilder::new()
+            .add_piece(PT::I, Coord::new(0, 1))
+            .add_piece(PT::I, Coord::new(3, 5))
+            .add_piece(PT::I, Coord::new(2, 7))
+            .build();
+
+        let res = relative_diff(&game);
+        assert_eq!(res, 7);
     }
 }
