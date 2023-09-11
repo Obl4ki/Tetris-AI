@@ -16,6 +16,7 @@ fn get_cols_max_heights(state: &Game) -> [usize; 10] {
 
 /// Measures the amount of holes present on board.
 /// Holes are defined as cells with no blocks that have some block above them.
+/// Distance to top block can be greater than one.
 #[must_use]
 pub fn holes_present(state: &Game) -> HeuristicScore {
     let mut score = 0;
