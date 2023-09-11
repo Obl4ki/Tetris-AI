@@ -1,6 +1,6 @@
 use itertools::Itertools;
 
-use crate::entities::{PieceType, Coord};
+use crate::entities::{Coord, PieceType};
 
 #[derive(Clone, Debug)]
 pub struct Board<const W: usize, const H: usize> {
@@ -14,7 +14,8 @@ impl<const W: usize, const H: usize> Default for Board<W, H> {
 }
 
 impl<const W: usize, const H: usize> Board<W, H> {
-    pub fn new() -> Self {
+    #[must_use]
+    pub const fn new() -> Self {
         Self {
             grid: [[None; H]; W],
         }
@@ -24,6 +25,7 @@ impl<const W: usize, const H: usize> Board<W, H> {
         self.grid[loc.x][loc.y] = block_type;
     }
 
+    #[must_use]
     pub fn get(&self, loc: Coord<usize>) -> Option<PieceType> {
         let col = self.grid.get(loc.x)?;
         let element = col.get(loc.y)?;

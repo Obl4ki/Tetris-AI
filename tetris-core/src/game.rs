@@ -1,5 +1,5 @@
 use crate::board::Board;
-use crate::entities::{PieceType, Collision, Coord, Direction};
+use crate::entities::{Collision, Coord, Direction, PieceType};
 use crate::piece::Piece;
 
 /// Main game struct, used to instantiate the game.
@@ -12,21 +12,27 @@ pub struct Game {
 }
 
 impl Game {
+    #[must_use]
     pub fn new() -> Self {
         Self {
             board: Board::new(),
-            piece: Piece::new(PieceType::O).unwrap(),
+            piece: Piece::new(PieceType::O),
             width: 10,
             height: 20,
         }
     }
 
     pub fn reload_piece(&mut self) {
-        self.piece = Piece::new(PieceType::I).unwrap()
+        self.piece = Piece::new(PieceType::I);
     }
 
     /// Check if after the move in the specified direction there will
     /// be any collision.
+    #[must_use]
+    // tetris board is only 10x20 and proper checks are made, so no numerical errors
+    #[allow(clippy::cast_possible_wrap)]
+    #[allow(clippy::cast_possible_truncation)]
+    #[allow(clippy::cast_sign_loss)]
     pub fn get_collision_after_move(&self, dir: Direction) -> Collision {
         let dir: Coord<i32> = dir.into();
 
@@ -38,7 +44,7 @@ impl Game {
                 return Collision::LeftBorder;
             }
 
-            if xx as usize >= self.width {
+            if xx >= self.width as i32 {
                 return Collision::RightBorder;
             }
 
@@ -81,7 +87,7 @@ impl Game {
         while self.get_collision_after_move(Direction::Down) == Collision::None {
             self.piece.anchor_point.y -= 1;
         }
-        // map the blocks from piece into the board
+
         self.set_piece_blocks_into_board();
         self.reload_piece();
     }

@@ -8,7 +8,7 @@ pub struct Coord<I: Integer> {
 }
 
 impl<I: Integer> Coord<I> {
-    pub fn new(x: I, y: I) -> Self {
+    pub const fn new(x: I, y: I) -> Self {
         Self { x, y }
     }
 }
@@ -25,17 +25,19 @@ impl TryFrom<Coord<i32>> for Coord<usize> {
     fn try_from(value: Coord<i32>) -> Result<Self, Self::Error> {
         let x = value.x.try_into()?;
         let y = value.y.try_into()?;
-        Ok(Coord::new(x, y))
+        Ok(Self::new(x, y))
     }
 }
 
+#[allow(clippy::cast_possible_truncation)]
+#[allow(clippy::cast_possible_wrap)]
 impl From<Coord<usize>> for Coord<i32> {
     fn from(value: Coord<usize>) -> Self {
-        Coord::new(value.x as i32, value.y as i32)
+        Self::new(value.x as i32, value.y as i32)
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum PieceType {
     I,
     O,
@@ -57,9 +59,9 @@ pub enum Direction {
 impl From<Direction> for Coord<i32> {
     fn from(value: Direction) -> Self {
         match value {
-            Direction::Left => Coord::new(-1, 0),
-            Direction::Right => Coord::new(1, 0),
-            Direction::Down => Coord::new(0, -1),
+            Direction::Left => Self::new(-1, 0),
+            Direction::Right => Self::new(1, 0),
+            Direction::Down => Self::new(0, -1),
         }
     }
 }

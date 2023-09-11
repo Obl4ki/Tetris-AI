@@ -8,17 +8,20 @@ pub struct GameBuilder {
 }
 
 impl GameBuilder {
-    pub fn new() -> Self {
+    #[must_use]
+    pub const fn new() -> Self {
         Self {
             board: Board::new(),
         }
     }
 
+    #[must_use]
     pub fn add_piece(mut self, piece: PieceType, coord: Coord<usize>) -> Self {
         self.board.set(Some(piece), coord);
         self
     }
 
+    #[must_use]
     pub fn build(self) -> Game {
         let mut game = Game::new();
         game.board = self.board;

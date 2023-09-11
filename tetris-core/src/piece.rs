@@ -1,4 +1,8 @@
-use crate::entities::{PieceType, Coord};
+use crate::entities::{Coord, PieceType};
+use rand::{
+    distributions::{Distribution, Standard},
+    Rng,
+};
 
 #[derive(Debug, Clone)]
 pub struct Piece {
@@ -6,6 +10,21 @@ pub struct Piece {
     pub anchor_point: Coord<usize>,
     pub blocks: Vec<Coord<i32>>,
     pub rotation_idx: usize,
+}
+
+impl Distribution<Piece> for Standard {
+    fn sample<R: Rng + ?Sized>(&self, rng: &mut R) -> Piece {
+        match rng.gen_range(0..7) {
+            0 => Piece::new(PieceType::I),
+            1 => Piece::new(PieceType::O),
+            2 => Piece::new(PieceType::T),
+            3 => Piece::new(PieceType::S),
+            4 => Piece::new(PieceType::Z),
+            5 => Piece::new(PieceType::J),
+            6 => Piece::new(PieceType::L),
+            _ => unreachable!(),
+        }
+    }
 }
 
 /// Every block is represented as a Coordinate relative to the anchor point.
@@ -25,32 +44,33 @@ fn _get_blocks(block_type: PieceType) -> Vec<Coord<i32>> {
 }
 
 impl Piece {
-    pub fn new(block_type: PieceType) -> Option<Self> {
+    #[must_use]
+    pub fn new(block_type: PieceType) -> Self {
         let anchor_point = Coord::new(4, 16);
 
-        Some(Self {
+        Self {
             block_type,
             anchor_point,
             blocks: _get_blocks(block_type),
             rotation_idx: 0,
-        })
+        }
     }
 
     pub fn iter_blocks(&self) -> impl Iterator<Item = Coord<i32>> + '_ {
         self.blocks.iter().map(move |Coord { x, y }| {
-            Coord::new(
-                *x + self.anchor_point.x as i32,
-                *y + self.anchor_point.y as i32,
-            )
+            let mut c: Coord<i32> = self.anchor_point.into();
+            c.x += *x;
+            c.y += *y;
+            c
         })
     }
 
     pub fn rotate(&mut self) {
-        self._rotate(true)
+        self._rotate(true);
     }
 
     pub fn rotate_ccw(&mut self) {
-        self._rotate(false)
+        self._rotate(false);
     }
 
     const CLOCKWISE_ROT: [[i32; 2]; 2] = [[0, -1], [1, 0]];
@@ -64,10 +84,10 @@ impl Piece {
         };
 
         for piece in &mut self.blocks {
-            let new_x_pos = r[0][0] * piece.x + r[1][0] * piece.y;
-            let new_y_pos = r[0][1] * piece.x + r[1][1] * piece.y;
-            piece.x = new_x_pos;
-            piece.y = new_y_pos;
+            let x_pos = r[0][0] * piece.x + r[1][0] * piece.y;
+            let y_pos = r[0][1] * piece.x + r[1][1] * piece.y;
+            piece.x = x_pos;
+            piece.y = y_pos;
         }
 
         match clockwise {
