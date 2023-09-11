@@ -1,10 +1,9 @@
+use itertools::Itertools;
 use tetris_core::{entities::Coord, prelude::Game};
 
-/// Measures the amount of holes present on board.
-/// Holes are defined as cells with no blocks that have some block above them.
-#[must_use]
-pub fn holes_present(state: &Game) -> usize {
-    let mut score = 0;
+type HeuristicScore = usize;
+
+fn get_cols_max_heights(state: &Game) -> [usize; 10] {
     let mut highest_blocks_x_axis = [0; 10];
 
     for (coord, _block) in state.board.iter_blocks() {
@@ -12,6 +11,15 @@ pub fn holes_present(state: &Game) -> usize {
             highest_blocks_x_axis[coord.x] = coord.y;
         }
     }
+    highest_blocks_x_axis
+}
+
+/// Measures the amount of holes present on board.
+/// Holes are defined as cells with no blocks that have some block above them.
+#[must_use]
+pub fn holes_present(state: &Game) -> HeuristicScore {
+    let mut score = 0;
+    let highest_blocks_x_axis = get_cols_max_heights(state);
 
     for (x, highest_y) in highest_blocks_x_axis.into_iter().enumerate() {
         score += (highest_y..=0)
@@ -23,7 +31,7 @@ pub fn holes_present(state: &Game) -> usize {
 }
 
 #[must_use]
-pub fn highest_block(state: &Game) -> usize {
+pub fn highest_block(state: &Game) -> HeuristicScore {
     state
         .board
         .iter_blocks()
@@ -31,6 +39,18 @@ pub fn highest_block(state: &Game) -> usize {
         .max()
         .unwrap_or(0)
         + 1
+}
+
+#[must_use]
+pub fn bumpyness(state: &Game) -> HeuristicScore {
+    let highest_blocks_x_axis = get_cols_max_heights(state);
+
+    let mut score = 0;
+    for (prev, next) in highest_blocks_x_axis.into_iter().tuple_windows::<(_, _)>() {
+        score += prev.abs_diff(next);
+    }
+
+    score
 }
 
 #[cfg(test)]
