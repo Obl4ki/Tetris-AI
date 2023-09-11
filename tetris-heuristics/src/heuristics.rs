@@ -3,11 +3,13 @@ use tetris_core::{entities::Coord, prelude::Game};
 
 type HeuristicScore = usize;
 
+/// Helper method to get height of each individual column in the tetris board.
+#[must_use]
 fn get_cols_max_heights(state: &Game) -> [usize; 10] {
     let mut highest_blocks_x_axis = [0; 10];
 
     for (coord, _block) in state.board.iter_blocks() {
-        if highest_blocks_x_axis[coord.x] > coord.y {
+        if dbg!(coord.y) > dbg!(highest_blocks_x_axis[coord.x]) {
             highest_blocks_x_axis[coord.x] = coord.y;
         }
     }
@@ -31,6 +33,7 @@ pub fn holes_present(state: &Game) -> HeuristicScore {
     score
 }
 
+/// Measures the height of the highest block in the entire tetris board.
 #[must_use]
 pub fn highest_block(state: &Game) -> HeuristicScore {
     state
@@ -42,6 +45,8 @@ pub fn highest_block(state: &Game) -> HeuristicScore {
         + 1
 }
 
+/// Measures the "bumpyness" of the columns in the grid.
+/// This means that difference in heights of each individual next and previous columns will be summed.
 #[must_use]
 pub fn bumpyness(state: &Game) -> HeuristicScore {
     let highest_blocks_x_axis = get_cols_max_heights(state);
@@ -58,8 +63,23 @@ pub fn bumpyness(state: &Game) -> HeuristicScore {
 mod tests {
     use tetris_core::{entities::Coord, game_builder::GameBuilder};
 
-    use crate::highest_block;
+    use crate::{heuristics::bumpyness, highest_block};
     use tetris_core::entities::PieceType as PT;
+
+    use super::get_cols_max_heights;
+
+    #[test]
+    fn test_get_cols_max_heights() {
+        let game = GameBuilder::new()
+            .add_piece(PT::I, Coord::new(0, 0))
+            .add_piece(PT::I, Coord::new(1, 1))
+            .add_piece(PT::I, Coord::new(2, 5))
+            .add_piece(PT::I, Coord::new(5, 9))
+            .build();
+        let heights = get_cols_max_heights(&game);
+
+        assert_eq!(heights, [0, 1, 5, 0, 0, 9, 0, 0, 0, 0]);
+    }
 
     #[test]
     fn test_highest_block_single_i() {
@@ -85,5 +105,22 @@ mod tests {
 
         let res = highest_block(&game);
         assert_eq!(res, 6);
+    }
+
+    #[test]
+    fn test_bumpyness() {
+        let game = GameBuilder::new()
+            .add_piece(PT::I, Coord::new(0, 0))
+            .add_piece(PT::I, Coord::new(1, 2))
+            .add_piece(PT::I, Coord::new(2, 2))
+            .add_piece(PT::I, Coord::new(3, 3))
+            .add_piece(PT::I, Coord::new(4, 4))
+            .add_piece(PT::I, Coord::new(5, 1))
+            .add_piece(PT::I, Coord::new(6, 4))
+            .add_piece(PT::I, Coord::new(7, 2))
+            .add_piece(PT::I, Coord::new(8, 2))
+            .add_piece(PT::I, Coord::new(9, 2))
+            .build();
+        assert_eq!(bumpyness(&game), 12);
     }
 }
