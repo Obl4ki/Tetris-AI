@@ -76,3 +76,9 @@ pub enum Collision {
     BottomBorder,
     Block,
 }
+
+#[derive(PartialEq, Eq, Clone, Copy, Debug)]
+pub enum Rotation {
+    Left,
+    Right,
+}

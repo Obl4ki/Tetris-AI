@@ -1,5 +1,5 @@
 use crate::board::Board;
-use crate::entities::{Collision, Coord, Direction, PieceType};
+use crate::entities::{Collision, Coord, Direction, PieceType, Rotation};
 use crate::piece::Piece;
 
 /// Main game struct, used to instantiate the game.
@@ -92,12 +92,11 @@ impl Game {
         self.reload_piece();
     }
 
-    pub fn rotate_cw(&mut self) {
-        self.piece.rotate();
-    }
-
-    pub fn rotate_ccw(&mut self) {
-        self.piece.rotate_ccw();
+    pub fn rotate(&mut self, rotation: Rotation) {
+        match rotation {
+            Rotation::Left => self.piece.rotate(),
+            Rotation::Right => self.piece.rotate_ccw(),
+        }
     }
 
     fn set_piece_blocks_into_board(&mut self) {

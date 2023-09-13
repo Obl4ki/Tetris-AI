@@ -98,10 +98,10 @@ fn keyboard_handling(keyboard: Res<Input<KeyCode>>, mut game: ResMut<TetrisGameR
         game.go_down();
     }
     if keyboard.just_pressed(KeyCode::Z) {
-        game.rotate_cw();
+        game.rotate(Rotation::Left);
     }
     if keyboard.just_pressed(KeyCode::X) {
-        game.rotate_ccw();
+        game.rotate(Rotation::Right);
     }
 }
 
