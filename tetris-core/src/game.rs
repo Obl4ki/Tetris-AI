@@ -104,7 +104,9 @@ impl Game {
         for piece_coords in self.piece.iter_blocks() {
             self.board.set(
                 Some(self.piece.block_type),
-                piece_coords.try_into().unwrap(),
+                piece_coords
+                    .try_into()
+                    .expect("Every piece block should be inside the board."),
             );
         }
     }
