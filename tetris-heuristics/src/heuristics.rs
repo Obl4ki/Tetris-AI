@@ -25,7 +25,8 @@ pub fn holes_present(state: &Game) -> HeuristicScore {
     let highest_blocks_x_axis = get_cols_max_heights(state);
 
     for (x, highest_y) in highest_blocks_x_axis.into_iter().enumerate() {
-        score += (highest_y..=0)
+        score += (0..highest_y)
+            .rev()
             .filter(|y| state.board.get(Coord::new(x, *y)).is_none())
             .count();
     }
@@ -74,7 +75,7 @@ mod tests {
 
     use crate::{
         heuristics::{bumpyness, relative_diff},
-        highest_block,
+        highest_block, holes_present,
     };
     use tetris_core::entities::PieceType as PT;
 
@@ -146,5 +147,17 @@ mod tests {
 
         let res = relative_diff(&game);
         assert_eq!(res, 7);
+    }
+
+    #[test]
+    fn test_holes_present() {
+        let game = GameBuilder::new()
+            .add_piece(PT::I, Coord::new(0, 1))
+            .add_piece(PT::I, Coord::new(1, 0))
+            .add_piece(PT::I, Coord::new(3, 3))
+            .build();
+
+        let res = holes_present(&game);
+        assert_eq!(res, 4);
     }
 }

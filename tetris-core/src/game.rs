@@ -23,7 +23,7 @@ impl Game {
     }
 
     pub fn reload_piece(&mut self) {
-        self.piece = Piece::new(PieceType::I);
+        self.piece = rand::random();
     }
 
     /// Check if after the move in the specified direction there will
