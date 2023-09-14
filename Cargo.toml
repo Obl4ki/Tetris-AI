@@ -1,5 +1,5 @@
 [workspace]
-members = ["tetris-bin", "tetris-core", "tetris-heuristics", "tests"]
+members = ["tetris-bin", "tetris-core", "tetris-heuristics", "tetris-macros", "tests"]
 resolver = "2"
 
 # Enable only a small amount of optimization in debug mode

@@ -1,5 +1,6 @@
 use anyhow::Result;
 use num::Integer;
+use std::ops::{self, AddAssign, SubAssign};
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct Coord<I: Integer> {
@@ -37,6 +38,36 @@ impl From<Coord<usize>> for Coord<i32> {
     }
 }
 
+impl<I: Integer> ops::Add for Coord<I> {
+    type Output = Self;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        Self::new(self.x + rhs.x, self.y + rhs.y)
+    }
+}
+
+impl<I: Integer + AddAssign> ops::AddAssign for Coord<I> {
+    fn add_assign(&mut self, rhs: Self) {
+        self.x += rhs.x;
+        self.y += rhs.y;
+    }
+}
+
+impl<I: Integer> ops::Sub for Coord<I> {
+    type Output = Self;
+
+    fn sub(self, rhs: Self) -> Self::Output {
+        Self::new(self.x - rhs.x, self.y - rhs.y)
+    }
+}
+
+impl<I: Integer + SubAssign> ops::SubAssign for Coord<I> {
+    fn sub_assign(&mut self, rhs: Self) {
+        self.x -= rhs.x;
+        self.y -= rhs.y;
+    }
+}
+
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum PieceType {
     I,
@@ -54,6 +85,7 @@ pub enum Direction {
     Left,
     Right,
     Down,
+    None,
 }
 
 impl From<Direction> for Coord<i32> {
@@ -62,6 +94,7 @@ impl From<Direction> for Coord<i32> {
             Direction::Left => Self::new(-1, 0),
             Direction::Right => Self::new(1, 0),
             Direction::Down => Self::new(0, -1),
+            Direction::None => Self::new(0, 0),
         }
     }
 }
@@ -79,6 +112,6 @@ pub enum Collision {
 
 #[derive(PartialEq, Eq, Clone, Copy, Debug)]
 pub enum Rotation {
-    Left,
-    Right,
+    Counterclockwise,
+    Clockwise,
 }

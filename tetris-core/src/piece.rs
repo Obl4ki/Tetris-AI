@@ -1,4 +1,4 @@
-use crate::entities::{Coord, PieceType};
+use crate::entities::{Coord, PieceType, Rotation};
 use rand::{
     distributions::{Distribution, Standard},
     Rng,
@@ -7,7 +7,7 @@ use rand::{
 #[derive(Debug, Clone)]
 pub struct Piece {
     pub block_type: PieceType,
-    pub anchor_point: Coord<usize>,
+    pub anchor_point: Coord<i32>,
     pub blocks: Vec<Coord<i32>>,
     pub rotation_idx: usize,
 }
@@ -30,7 +30,7 @@ impl Distribution<Piece> for Standard {
 /// Every block is represented as a Coordinate relative to the anchor point.
 fn _get_blocks(block_type: PieceType) -> Vec<Coord<i32>> {
     match block_type {
-        PieceType::I => vec![(0, -1), (0, 0), (0, 1), (0, 2)],
+        PieceType::I => vec![(0, -2), (0, -1), (0, 0), (0, 1)],
         PieceType::O => vec![(0, 0), (0, 1), (1, 0), (1, 1)],
         PieceType::T => vec![(0, 0), (-1, 0), (1, 0), (0, 1)],
         PieceType::S => vec![(0, 0), (-1, 0), (0, 1), (1, 1)],
@@ -57,30 +57,16 @@ impl Piece {
     }
 
     pub fn iter_blocks(&self) -> impl Iterator<Item = Coord<i32>> + '_ {
-        self.blocks.iter().map(move |Coord { x, y }| {
-            let mut c: Coord<i32> = self.anchor_point.into();
-            c.x += *x;
-            c.y += *y;
-            c
-        })
-    }
-
-    pub fn rotate(&mut self) {
-        self._rotate(true);
-    }
-
-    pub fn rotate_ccw(&mut self) {
-        self._rotate(false);
+        self.blocks.iter().map(|coord| self.anchor_point + *coord)
     }
 
     const CLOCKWISE_ROT: [[i32; 2]; 2] = [[0, -1], [1, 0]];
     const COUNTER_CLOCKWISE_ROT: [[i32; 2]; 2] = [[0, 1], [-1, 0]];
 
-    fn _rotate(&mut self, clockwise: bool) {
-        let r = if clockwise {
-            Self::CLOCKWISE_ROT
-        } else {
-            Self::COUNTER_CLOCKWISE_ROT
+    pub fn rotate(&mut self, clockwise: Rotation) {
+        let r = match clockwise {
+            Rotation::Clockwise => Self::CLOCKWISE_ROT,
+            Rotation::Counterclockwise => Self::COUNTER_CLOCKWISE_ROT,
         };
 
         for piece in &mut self.blocks {
@@ -91,14 +77,14 @@ impl Piece {
         }
 
         match clockwise {
-            true => {
+            Rotation::Clockwise => {
                 if self.rotation_idx == 3 {
                     self.rotation_idx = 0;
                 } else {
                     self.rotation_idx += 1;
                 }
             }
-            false => {
+            Rotation::Counterclockwise => {
                 if self.rotation_idx == 0 {
                     self.rotation_idx = 3;
                 } else {

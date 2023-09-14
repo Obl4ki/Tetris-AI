@@ -26,9 +26,9 @@ impl<const W: usize, const H: usize> Board<W, H> {
     }
 
     #[must_use]
-    pub fn get(&self, loc: Coord<usize>) -> Option<PieceType> {
-        let col = self.grid.get(loc.x)?;
-        let element = col.get(loc.y)?;
+    pub fn get(&self, loc: Coord<i32>) -> Option<PieceType> {
+        let col = self.grid.get(loc.x as usize)?;
+        let element = col.get(loc.y as usize)?;
         *element
     }
 

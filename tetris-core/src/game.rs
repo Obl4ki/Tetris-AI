@@ -1,14 +1,15 @@
 use crate::board::Board;
 use crate::entities::{Collision, Coord, Direction, PieceType, Rotation};
 use crate::piece::Piece;
+use crate::srs::get_offset_table;
 
 /// Main game struct, used to instantiate the game.
 #[derive(Debug)]
 pub struct Game {
     pub board: Board<10, 20>,
     pub piece: Piece,
-    pub width: usize,
-    pub height: usize,
+    pub width: i32,
+    pub height: i32,
 }
 
 impl Game {
@@ -29,30 +30,26 @@ impl Game {
     /// Check if after the move in the specified direction there will
     /// be any collision.
     #[must_use]
-    // tetris board is only 10x20 and proper checks are made, so no numerical errors
-    #[allow(clippy::cast_possible_wrap)]
-    #[allow(clippy::cast_possible_truncation)]
-    #[allow(clippy::cast_sign_loss)]
     pub fn get_collision_after_move(&self, dir: Direction) -> Collision {
-        let dir: Coord<i32> = dir.into();
+        let dir = Coord::from(dir);
 
-        for pos in self.piece.iter_blocks() {
-            let xx = pos.x + dir.x;
-            let yy = pos.y + dir.y;
+        for mut block_pos in self.piece.iter_blocks() {
+            block_pos.x += dir.x;
+            block_pos.y += dir.y;
 
-            if xx < 0 {
+            if block_pos.x < 0 {
                 return Collision::LeftBorder;
             }
 
-            if xx >= self.width as i32 {
+            if block_pos.x >= self.width {
                 return Collision::RightBorder;
             }
 
-            if yy < 0 {
+            if block_pos.y < 0 {
                 return Collision::BottomBorder;
             }
 
-            let target_block = self.board.get((xx as usize, yy as usize).into());
+            let target_block = self.board.get(block_pos);
 
             if let Some(_block) = target_block {
                 return Collision::Block;
@@ -93,10 +90,21 @@ impl Game {
     }
 
     pub fn rotate(&mut self, rotation: Rotation) {
-        match rotation {
-            Rotation::Left => self.piece.rotate(),
-            Rotation::Right => self.piece.rotate_ccw(),
+        let original_piece = self.piece.clone();
+        self.piece.rotate(rotation);
+        dbg!(self.piece.rotation_idx);
+        for srs_case in get_offset_table(self.piece.block_type) {
+            let offset = srs_case[self.piece.rotation_idx];
+            let mut kicked_piece = self.piece.clone();
+
+            kicked_piece.anchor_point += offset;
+            if self.get_collision_after_move(Direction::None) == Collision::None {
+                self.piece = kicked_piece;
+                return;
+            }
         }
+
+        self.piece = original_piece;
     }
 
     fn set_piece_blocks_into_board(&mut self) {

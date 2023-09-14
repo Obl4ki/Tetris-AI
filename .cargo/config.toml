@@ -1,0 +1,3 @@
+# Change linker to lld for faster compile times
+# [build]
+# rustflags = ["-C", "link-arg=-fuse-ld=lld"]

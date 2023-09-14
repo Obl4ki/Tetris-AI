@@ -10,7 +10,7 @@ pub fn get_offset_table(block_type: PieceType) -> Vec<Vec<Coord<i32>>> {
             vec![(-1, 0), (0, 1), (1, 0), (0, -1)],
             vec![(2, 0), (0, -2), (-2, 0), (0, 2)],
         ],
-        PieceType::O => vec![vec![(0, 0), (0, -1), (-1, -1), (-1, 0)]],
+        PieceType::O => vec![vec![(-1, 0), (0, 1), (1, 0), (0, -1)]],
         PieceType::T | PieceType::S | PieceType::Z | PieceType::J | PieceType::L => vec![
             vec![(0, 0), (0, 0), (0, 0), (0, 0)],
             vec![(0, 0), (1, 0), (0, 0), (-1, 0)],
