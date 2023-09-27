@@ -38,4 +38,39 @@ impl<const W: usize, const H: usize> Board<W, H> {
             val.map(|block_type| (Coord::new(x, y), block_type))
         })
     }
+
+    pub fn delete_full_lines(&mut self, ys: Vec<i32>) {
+        let mut lines_to_delete = vec![];
+        for y in ys {
+            if self.is_whole_line_occupied(y) {
+                lines_to_delete.push(y);
+            }
+        }
+
+        lines_to_delete.sort_unstable();
+
+        for y in lines_to_delete.into_iter().rev() {
+            self.delete_line_and_shift_upper_lines_down(y as usize);
+        }
+    }
+
+    #[must_use]
+    fn is_whole_line_occupied(&self, y: i32) -> bool {
+        (0..W)
+            .map(|x| self.get(Coord::new(x as i32, y)))
+            .all(|cell| cell.is_some())
+    }
+
+    fn delete_line_and_shift_upper_lines_down(&mut self, y: usize) {
+        for upper_y in y + 1..H {
+            for x in 0..W {
+                let upper_block = self.get((x as i32, upper_y as i32).into());
+                self.set(upper_block, (x, upper_y - 1).into());
+            }
+        }
+
+        for x in 0..W {
+            self.set(None, (x, H - 1).into());
+        }
+    }
 }

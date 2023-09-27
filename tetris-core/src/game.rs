@@ -75,8 +75,7 @@ impl Game {
         if self.get_collision_after_move(Direction::Down, &self.piece) == Collision::None {
             self.piece.anchor_point.y -= 1;
         } else {
-            self.set_piece_blocks_into_board();
-            self.reload_piece();
+            self.on_drop();
         }
     }
 
@@ -85,8 +84,7 @@ impl Game {
             self.piece.anchor_point.y -= 1;
         }
 
-        self.set_piece_blocks_into_board();
-        self.reload_piece();
+        self.on_drop();
     }
 
     pub fn rotate(&mut self, rotation: Rotation) {
@@ -112,6 +110,16 @@ impl Game {
         self.piece = original_piece;
     }
 
+    fn on_drop(&mut self) {
+        self.set_piece_blocks_into_board();
+        self.board.delete_full_lines(
+            self.piece
+                .iter_blocks()
+                .map(|Coord { x: _, y }| y)
+                .collect(),
+        );
+        self.reload_piece();
+    }
     fn set_piece_blocks_into_board(&mut self) {
         for piece_coords in self.piece.iter_blocks() {
             self.board.set(
