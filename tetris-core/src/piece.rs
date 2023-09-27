@@ -8,7 +8,7 @@ use rand::{
 pub struct Piece {
     pub block_type: PieceType,
     pub anchor_point: Coord<i32>,
-    pub blocks: Vec<Coord<i32>>,
+    pub block_positions: Vec<Coord<i32>>,
     pub rotation_idx: usize,
 }
 
@@ -28,15 +28,15 @@ impl Distribution<Piece> for Standard {
 }
 
 /// Every block is represented as a Coordinate relative to the anchor point.
-fn _get_blocks(block_type: PieceType) -> Vec<Coord<i32>> {
+pub fn get_blocks(block_type: PieceType) -> Vec<Coord<i32>> {
     match block_type {
         PieceType::I => vec![(0, -2), (0, -1), (0, 0), (0, 1)],
         PieceType::O => vec![(0, 0), (0, 1), (1, 0), (1, 1)],
         PieceType::T => vec![(0, 0), (-1, 0), (1, 0), (0, 1)],
         PieceType::S => vec![(0, 0), (-1, 0), (0, 1), (1, 1)],
         PieceType::Z => vec![(0, 0), (0, 1), (-1, 1), (1, 0)],
-        PieceType::J => vec![(0, 0), (0, 1), (0, 2), (-1, 0)],
-        PieceType::L => vec![(0, 0), (0, 1), (0, 2), (1, 0)],
+        PieceType::J => vec![(0, 0), (-1, 0), (-1, 1), (1, 0)],
+        PieceType::L => vec![(0, 0), (-1, 0), (1, 0), (1, 1)],
     }
     .into_iter()
     .map(Coord::from)
@@ -46,18 +46,20 @@ fn _get_blocks(block_type: PieceType) -> Vec<Coord<i32>> {
 impl Piece {
     #[must_use]
     pub fn new(block_type: PieceType) -> Self {
-        let anchor_point = Coord::new(4, 16);
+        let anchor_point = Coord::new(4, 21);
 
         Self {
             block_type,
             anchor_point,
-            blocks: _get_blocks(block_type),
+            block_positions: get_blocks(block_type),
             rotation_idx: 0,
         }
     }
 
     pub fn iter_blocks(&self) -> impl Iterator<Item = Coord<i32>> + '_ {
-        self.blocks.iter().map(|coord| self.anchor_point + *coord)
+        self.block_positions
+            .iter()
+            .map(|coord| self.anchor_point + *coord)
     }
 
     const CLOCKWISE_ROT: [[i32; 2]; 2] = [[0, -1], [1, 0]];
@@ -69,7 +71,7 @@ impl Piece {
             Rotation::Counterclockwise => Self::COUNTER_CLOCKWISE_ROT,
         };
 
-        for piece in &mut self.blocks {
+        for piece in &mut self.block_positions {
             let x_pos = r[0][0] * piece.x + r[1][0] * piece.y;
             let y_pos = r[0][1] * piece.x + r[1][1] * piece.y;
             piece.x = x_pos;

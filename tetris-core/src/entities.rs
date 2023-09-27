@@ -2,7 +2,7 @@ use anyhow::Result;
 use num::Integer;
 use std::ops::{self, AddAssign, SubAssign};
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Coord<I: Integer> {
     pub x: I,
     pub y: I,
