@@ -9,6 +9,8 @@ mod tetris_game_resource;
 use bevy::core_pipeline::prelude::ClearColor;
 use tetris_game_resource::TetrisGameResource;
 
+use std::process;
+
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
@@ -21,6 +23,7 @@ fn main() {
         .add_systems(PreUpdate, despawn_all_blocks)
         .add_systems(Update, draw_game_state)
         .add_systems(Update, keyboard_handling)
+        .add_systems(PostUpdate, if_lost_then_exit)
         .run()
 }
 
@@ -82,6 +85,10 @@ fn draw_rectangle(commands: &mut Commands, color: Color, x: f32, y: f32) {
 }
 
 fn keyboard_handling(keyboard: Res<Input<KeyCode>>, mut game: ResMut<TetrisGameResource>) {
+    if game.is_lost() {
+        return;
+    }
+
     if keyboard.just_pressed(KeyCode::Space) {
         game.hard_drop();
     }
@@ -112,5 +119,11 @@ fn draw_background(mut commands: Commands, game: Res<TetrisGameResource>) {
                 y as f32 * (BLOCK_SIZE + MARGIN) + GLOBAL_OFFSET,
             )
         }
+    }
+}
+
+fn if_lost_then_exit(game: Res<TetrisGameResource>) {
+    if game.is_lost() {
+        process::exit(0);
     }
 }

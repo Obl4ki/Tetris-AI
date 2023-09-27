@@ -6,7 +6,7 @@ use crate::srs::get_offset_table;
 /// Main game struct, used to instantiate the game.
 #[derive(Debug)]
 pub struct Game {
-    pub board: Board<10, 20>,
+    pub board: Board<10, 23>,
     pub piece: Piece,
     pub width: i32,
     pub height: i32,
@@ -108,6 +108,11 @@ impl Game {
         }
 
         self.piece = original_piece;
+    }
+
+    #[must_use]
+    pub fn is_lost(&self) -> bool {
+        self.board.iter_blocks().any(|(coord, _)| coord.y >= 20)
     }
 
     fn on_drop(&mut self) {

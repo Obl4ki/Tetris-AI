@@ -4,7 +4,7 @@ use crate::game::Game;
 
 #[derive(Debug, Default, Clone)]
 pub struct GameBuilder {
-    board: Board<10, 20>,
+    board: Board<10, 23>,
 }
 
 impl GameBuilder {
