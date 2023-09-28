@@ -39,7 +39,7 @@ impl<const W: usize, const H: usize> Board<W, H> {
         })
     }
 
-    pub fn delete_full_lines(&mut self, ys: Vec<i32>) {
+    pub fn delete_full_lines(&mut self, ys: Vec<i32>) -> usize {
         let mut lines_to_delete = vec![];
         for y in ys {
             if self.is_whole_line_occupied(y) {
@@ -49,9 +49,11 @@ impl<const W: usize, const H: usize> Board<W, H> {
 
         lines_to_delete.sort_unstable();
 
-        for y in lines_to_delete.into_iter().rev() {
-            self.delete_line_and_shift_upper_lines_down(y as usize);
+        for y in lines_to_delete.iter().rev() {
+            self.delete_line_and_shift_upper_lines_down(*y as usize);
         }
+
+        lines_to_delete.len()
     }
 
     #[must_use]

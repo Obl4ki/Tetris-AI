@@ -1,6 +1,7 @@
 use crate::board::Board;
 use crate::entities::{Collision, Coord, Direction, PieceType, Rotation};
 use crate::piece::Piece;
+use crate::scoring::Score;
 use crate::srs::get_offset_table;
 
 /// Main game struct, used to instantiate the game.
@@ -10,6 +11,7 @@ pub struct Game {
     pub piece: Piece,
     pub width: i32,
     pub height: i32,
+    pub score: Score,
 }
 
 impl Game {
@@ -20,6 +22,7 @@ impl Game {
             piece: Piece::new(PieceType::O),
             width: 10,
             height: 20,
+            score: Score::default(),
         }
     }
 
@@ -117,12 +120,13 @@ impl Game {
 
     fn on_drop(&mut self) {
         self.set_piece_blocks_into_board();
-        self.board.delete_full_lines(
+        let n_cleans = self.board.delete_full_lines(
             self.piece
                 .iter_blocks()
                 .map(|Coord { x: _, y }| y)
                 .collect(),
         );
+        self.score.on_lines_clear(n_cleans);
         self.reload_piece();
     }
     fn set_piece_blocks_into_board(&mut self) {
