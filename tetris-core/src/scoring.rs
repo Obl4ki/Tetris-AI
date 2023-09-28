@@ -2,6 +2,7 @@
 pub struct Score {
     cleared_rows: usize,
     score: usize,
+    dropped_pieces: usize,
 }
 
 impl Score {
@@ -14,5 +15,9 @@ impl Score {
             1 => 100,
             _ => 0,
         }
+    }
+
+    pub fn on_drop(&mut self) {
+        self.dropped_pieces += 1;
     }
 }

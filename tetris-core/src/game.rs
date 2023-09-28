@@ -126,7 +126,10 @@ impl Game {
                 .map(|Coord { x: _, y }| y)
                 .collect(),
         );
+        
         self.score.on_lines_clear(n_cleans);
+        self.score.on_drop();
+
         self.reload_piece();
     }
     fn set_piece_blocks_into_board(&mut self) {
