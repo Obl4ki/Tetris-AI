@@ -1,0 +1,9 @@
+[package]
+name = "tetris-ml"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tetris-core = { path = "../tetris-core" }
+serde = { version = "1.0.188", features = ["derive"] }
+anyhow = "1.0.75"

@@ -1,19 +1,23 @@
 use itertools::Itertools;
+use serde::{Deserialize, Serialize};
 
 use crate::entities::{Coord, PieceType};
 
-#[derive(Clone, Debug)]
-pub struct Board<const W: usize, const H: usize> {
+const W: usize = 10;
+const H: usize = 23;
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct Board {
     grid: [[Option<PieceType>; H]; W],
 }
 
-impl<const W: usize, const H: usize> Default for Board<W, H> {
+impl Default for Board {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl<const W: usize, const H: usize> Board<W, H> {
+impl Board {
     #[must_use]
     pub const fn new() -> Self {
         Self {

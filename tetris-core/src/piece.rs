@@ -3,8 +3,9 @@ use rand::{
     distributions::{Distribution, Standard},
     Rng,
 };
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Piece {
     pub block_type: PieceType,
     pub anchor_point: Coord<i32>,

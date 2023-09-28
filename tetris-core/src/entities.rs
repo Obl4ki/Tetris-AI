@@ -1,8 +1,9 @@
 use anyhow::Result;
 use num::Integer;
+use serde::{Deserialize, Serialize};
 use std::ops::{self, AddAssign, SubAssign};
 
-#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub struct Coord<I: Integer> {
     pub x: I,
     pub y: I,
@@ -68,7 +69,7 @@ impl<I: Integer + SubAssign> ops::SubAssign for Coord<I> {
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Serialize, Deserialize)]
 pub enum PieceType {
     I,
     O,

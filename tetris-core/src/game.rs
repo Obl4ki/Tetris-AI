@@ -1,3 +1,5 @@
+use serde::{Deserialize, Serialize};
+
 use crate::board::Board;
 use crate::entities::{Collision, Coord, Direction, PieceType, Rotation};
 use crate::piece::Piece;
@@ -5,9 +7,9 @@ use crate::scoring::Score;
 use crate::srs::get_offset_table;
 
 /// Main game struct, used to instantiate the game.
-#[derive(Debug)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Game {
-    pub board: Board<10, 23>,
+    pub board: Board,
     pub piece: Piece,
     pub width: i32,
     pub height: i32,
@@ -126,7 +128,7 @@ impl Game {
                 .map(|Coord { x: _, y }| y)
                 .collect(),
         );
-        
+
         self.score.on_lines_clear(n_cleans);
         self.score.on_drop();
 

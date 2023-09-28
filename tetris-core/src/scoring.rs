@@ -1,4 +1,8 @@
-#[derive(Debug, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy)]
+use serde::{Deserialize, Serialize};
+
+#[derive(
+    Debug, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy, Serialize, Deserialize,
+)]
 pub struct Score {
     cleared_rows: usize,
     score: usize,

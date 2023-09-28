@@ -37,7 +37,7 @@ fn despawn_all_blocks(mut commands: Commands, query: Query<Entity, With<Sprite>>
     }
 }
 
-fn draw_game_state(mut commands: Commands, game: ResMut<TetrisGameResource>) {
+fn draw_game_state(mut commands: Commands, game: Res<TetrisGameResource>) {
     for (pos, block) in game.board.iter_blocks() {
         let color = get_color_of_block_type(block);
 
@@ -91,6 +91,7 @@ fn keyboard_handling(keyboard: Res<Input<KeyCode>>, mut game: ResMut<TetrisGameR
 
     if keyboard.just_pressed(KeyCode::Space) {
         game.hard_drop();
+        dbg!(&game.score);
     }
     if keyboard.just_pressed(KeyCode::Left) {
         game.go_left();
