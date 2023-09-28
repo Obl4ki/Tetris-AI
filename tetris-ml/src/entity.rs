@@ -30,6 +30,15 @@ impl Entity {
             weights: dist.sample_iter(rng).take(n_weights).collect(),
         }
     }
+
+    #[must_use]
+    pub fn calculate_weighted_heuristic(&self, game: &Game) -> HeuristicScore {
+        self.weights
+            .iter()
+            .zip(HEURISTICS.iter())
+            .map(|(weight, h)| h(game) * weight)
+            .sum()
+    }
 }
 
 impl Default for Entity {

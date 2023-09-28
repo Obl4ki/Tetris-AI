@@ -1,7 +1,7 @@
 use itertools::Itertools;
 use tetris_core::{entities::Coord, prelude::Game};
 
-pub type HeuristicScore = usize;
+pub type HeuristicScore = f32;
 
 /// Helper method to get height of each individual column in the tetris board.
 #[must_use]
@@ -21,14 +21,14 @@ fn get_cols_max_heights(state: &Game) -> [usize; 10] {
 /// Distance to top block can be greater than one.
 #[must_use]
 pub fn holes_present(state: &Game) -> HeuristicScore {
-    let mut score = 0;
+    let mut score = 0.;
     let highest_blocks_x_axis = get_cols_max_heights(state);
 
     for (x, highest_y) in highest_blocks_x_axis.into_iter().enumerate() {
         score += (0..highest_y)
             .rev()
             .filter(|y| state.board.get(Coord::new(x as i32, *y as i32)).is_none())
-            .count();
+            .count() as f32;
     }
 
     score
@@ -42,8 +42,8 @@ pub fn highest_block(state: &Game) -> HeuristicScore {
         .iter_blocks()
         .map(|(coord, _)| coord.y)
         .max()
-        .unwrap_or(0)
-        + 1
+        .unwrap_or(0) as f32
+        + 1.
 }
 
 /// Measures the "bumpyness" of the columns in the grid.
@@ -52,9 +52,9 @@ pub fn highest_block(state: &Game) -> HeuristicScore {
 pub fn bumpyness(state: &Game) -> HeuristicScore {
     let highest_blocks_x_axis = get_cols_max_heights(state);
 
-    let mut score = 0;
+    let mut score = 0.;
     for (prev, next) in highest_blocks_x_axis.into_iter().tuple_windows::<(_, _)>() {
-        score += prev.abs_diff(next);
+        score += prev.abs_diff(next) as f32;
     }
 
     score
@@ -64,13 +64,14 @@ pub fn bumpyness(state: &Game) -> HeuristicScore {
 #[must_use]
 pub fn relative_diff(state: &Game) -> HeuristicScore {
     let heights = dbg!(get_cols_max_heights(state));
-    let max = heights.iter().max().copied().unwrap_or_default();
-    let min = heights.iter().min().copied().unwrap_or_default();
+    let max = heights.iter().max().copied().unwrap_or_default() as f32;
+    let min = heights.iter().min().copied().unwrap_or_default() as f32;
     max - min
 }
 
 #[cfg(test)]
 mod tests {
+
     use tetris_core::{entities::Coord, game_builder::GameBuilder};
 
     use crate::{
@@ -104,7 +105,7 @@ mod tests {
             .build();
 
         let res = highest_block(&game);
-        assert_eq!(res, 4);
+        assert!((res - 4.).abs() < f32::EPSILON);
     }
 
     #[test]
@@ -117,7 +118,7 @@ mod tests {
             .build();
 
         let res = highest_block(&game);
-        assert_eq!(res, 6);
+        assert!((res - 6.).abs() < f32::EPSILON);
     }
 
     #[test]
@@ -134,7 +135,8 @@ mod tests {
             .add_piece(PT::I, Coord::new(8, 2))
             .add_piece(PT::I, Coord::new(9, 2))
             .build();
-        assert_eq!(bumpyness(&game), 12);
+        let res = bumpyness(&game);
+        assert!((res - 12.).abs() < f32::EPSILON);
     }
 
     #[test]
@@ -146,7 +148,7 @@ mod tests {
             .build();
 
         let res = relative_diff(&game);
-        assert_eq!(res, 7);
+        assert!((res - 7.).abs() < f32::EPSILON);
     }
 
     #[test]
@@ -158,6 +160,6 @@ mod tests {
             .build();
 
         let res = holes_present(&game);
-        assert_eq!(res, 4);
+        assert!((res - 4.).abs() < f32::EPSILON);
     }
 }
