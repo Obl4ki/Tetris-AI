@@ -1,7 +1,7 @@
 use itertools::Itertools;
 use tetris_core::{entities::Coord, prelude::Game};
 
-type HeuristicScore = usize;
+pub type HeuristicScore = usize;
 
 /// Helper method to get height of each individual column in the tetris board.
 #[must_use]

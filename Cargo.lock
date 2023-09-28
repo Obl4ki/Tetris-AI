@@ -2217,8 +2217,11 @@ name = "tetris-ml"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "lazy_static",
+ "rand",
  "serde",
  "tetris-core",
+ "tetris-heuristics",
 ]
 
 [[package]]

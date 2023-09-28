@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::board::Board;
-use crate::entities::{Collision, Coord, Direction, PieceType, Rotation};
+use crate::entities::{Collision, Coord, Direction, Rotation};
 use crate::piece::Piece;
 use crate::scoring::Score;
 use crate::srs::get_offset_table;
@@ -21,7 +21,7 @@ impl Game {
     pub fn new() -> Self {
         Self {
             board: Board::new(),
-            piece: Piece::new(PieceType::O),
+            piece: rand::random(),
             width: 10,
             height: 20,
             score: Score::default(),

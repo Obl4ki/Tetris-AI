@@ -1,15 +1,17 @@
 use serde::{Deserialize, Serialize};
-use tetris_core::prelude::*;
+
+use crate::entity::Entity;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Population {
-    entities: Vec<Game>,
+    entities: Vec<Entity>,
 }
 
 impl Population {
     #[must_use]
-    pub fn initialization(&self) -> Self {
-        todo!();
+    pub fn new(n_entities: usize) -> Self {
+        let entities = (0..n_entities).map(|_| Entity::new()).collect();
+        Self { entities }
     }
 
     #[must_use]
