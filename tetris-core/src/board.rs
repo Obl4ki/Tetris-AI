@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
@@ -6,7 +8,7 @@ use crate::entities::{Coord, PieceType};
 const W: usize = 10;
 const H: usize = 23;
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, Hash)]
 pub struct Board {
     grid: [[Option<PieceType>; H]; W],
 }
@@ -78,5 +80,30 @@ impl Board {
         for x in 0..W {
             self.set(None, (x, H - 1).into());
         }
+    }
+}
+
+impl Display for Board {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        for y in (0..H).rev() {
+            write!(f, "[")?;
+
+            for x in 0..W {
+                let cell = self.get(Coord::new(x as i32, y as i32));
+                let cell_str = cell.map_or(" - ", |block| match block {
+                    PieceType::I => " I ",
+                    PieceType::O => " O ",
+                    PieceType::T => " T ",
+                    PieceType::S => " S ",
+                    PieceType::Z => " Z ",
+                    PieceType::J => " J ",
+                    PieceType::L => " L ",
+                });
+
+                write!(f, "{cell_str}")?;
+            }
+            writeln!(f, "]")?;
+        }
+        Ok(())
     }
 }

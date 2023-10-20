@@ -13,3 +13,4 @@ bevy = { version = "0.11.2", default-features = false, features = [
     "dynamic_linking",
 ] }
 tetris-core = { path = "../tetris-core" }
+tetris-ml = { path = "../tetris-ml" }

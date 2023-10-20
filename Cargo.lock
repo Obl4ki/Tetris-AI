@@ -2191,6 +2191,7 @@ version = "0.1.0"
 dependencies = [
  "bevy",
  "tetris-core",
+ "tetris-ml",
 ]
 
 [[package]]

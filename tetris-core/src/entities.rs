@@ -69,7 +69,7 @@ impl<I: Integer + SubAssign> ops::SubAssign for Coord<I> {
     }
 }
 
-#[derive(Clone, Copy, PartialEq, Eq, Debug, Serialize, Deserialize)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug, Serialize, Deserialize, Hash)]
 pub enum PieceType {
     I,
     O,

@@ -5,7 +5,7 @@ use rand::{
 };
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Hash, PartialEq, Eq)]
 pub struct Piece {
     pub block_type: PieceType,
     pub anchor_point: Coord<i32>,

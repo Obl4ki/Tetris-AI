@@ -12,19 +12,23 @@ use tetris_game_resource::TetrisGameResource;
 use std::process;
 
 fn main() {
-    App::new()
-        .add_plugins(DefaultPlugins)
-        .add_systems(Startup, setup)
-        .insert_resource(ClearColor(Color::BLACK))
-        .insert_resource(Msaa::Sample4)
-        .insert_resource(TetrisGameResource(Game::new()))
-        .add_systems(PreUpdate, bevy::window::close_on_esc)
-        .add_systems(PreUpdate, draw_background)
-        .add_systems(PreUpdate, despawn_all_blocks)
-        .add_systems(Update, draw_game_state)
-        .add_systems(Update, keyboard_handling)
-        .add_systems(PostUpdate, if_lost_then_exit)
-        .run()
+    // App::new()
+    //     .add_plugins(DefaultPlugins)
+    //     .add_systems(Startup, setup)
+    //     .insert_resource(ClearColor(Color::BLACK))
+    //     .insert_resource(Msaa::Sample4)
+    //     .insert_resource(TetrisGameResource(Game::new()))
+    //     .add_systems(PreUpdate, bevy::window::close_on_esc)
+    //     .add_systems(PreUpdate, draw_background)
+    //     .add_systems(PreUpdate, despawn_all_blocks)
+    //     .add_systems(Update, draw_game_state)
+    //     .add_systems(Update, keyboard_handling)
+    //     .add_systems(PostUpdate, if_lost_then_exit)
+    //     .run()
+    let agent = tetris_ml::entity::Entity::new();
+    for next_game in agent.get_all_possible_next_game_states() {
+        println!("{}", next_game.board);
+    }
 }
 
 fn setup(mut commands: Commands) {
