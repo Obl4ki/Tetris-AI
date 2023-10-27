@@ -8,7 +8,7 @@ use crate::entities::{Coord, PieceType};
 const W: usize = 10;
 const H: usize = 23;
 
-#[derive(Clone, Debug, Serialize, Deserialize, Hash)]
+#[derive(Clone, Debug, Serialize, Deserialize, Hash, PartialEq, Eq)]
 pub struct Board {
     grid: [[Option<PieceType>; H]; W],
 }

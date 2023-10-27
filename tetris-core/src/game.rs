@@ -7,14 +7,14 @@ use crate::scoring::Score;
 use crate::srs::get_offset_table;
 
 /// Main game struct, used to instantiate the game.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Hash, PartialEq, Eq)]
 pub struct Game {
     pub board: Board,
     pub piece: Piece,
     pub width: i32,
     pub height: i32,
     pub score: Score,
-    pub piece_recently_dropped: bool
+    pub piece_recently_dropped: bool,
 }
 
 impl Game {

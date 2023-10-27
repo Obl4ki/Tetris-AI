@@ -2,7 +2,7 @@ use std::collections::{HashSet, VecDeque};
 
 use rand::distributions::{Distribution, Uniform};
 use serde::{Deserialize, Serialize};
-use tetris_core::prelude::{Coord, Game, Piece, Rotation};
+use tetris_core::prelude::{Board, Game, Piece, Rotation};
 use tetris_heuristics::{
     heuristics::{bumpyness, relative_diff, HeuristicScore},
     highest_block, holes_present,
@@ -33,19 +33,24 @@ impl Entity {
         let rng = rand::thread_rng();
         let dist = Uniform::from(0.0..1.0);
         let n_weights = HEURISTICS.len();
+        let center_offset = 0.5;
         Self {
             game: Game::new(),
-            weights: dist.sample_iter(rng).take(n_weights).collect(),
+            weights: dist
+                .sample_iter(rng)
+                .take(n_weights)
+                .map(|x| x - center_offset)
+                .collect(),
         }
     }
 
-    const ACTIONS: [&dyn Fn(&mut Game); 6] = [
-        &Game::go_down,
-        &Game::go_left,
-        &Game::go_right,
-        &Game::hard_drop,
-        &|game| game.rotate(Rotation::Counterclockwise),
-        &|game| game.rotate(Rotation::Clockwise),
+    const ACTIONS: [fn(&mut Game); 6] = [
+        Game::go_down,
+        Game::go_left,
+        Game::go_right,
+        Game::hard_drop,
+        |game| game.rotate(Rotation::Counterclockwise),
+        |game| game.rotate(Rotation::Clockwise),
     ];
 
     /// Implementation of an algorithm to discover and collect all possible game states after 1 piece drop.
@@ -56,10 +61,11 @@ impl Entity {
     /// Use hashset to delete pieces that were previously branched out to avoid repetition.
     #[must_use]
     #[allow(clippy::cast_possible_truncation)]
-    pub fn get_all_possible_next_game_states(&self) -> Vec<Game> {
+    pub fn get_all_possible_next_game_states(&self) -> Vec<Board> {
         let mut game = self.game.clone();
         let max_height = highest_block(&game);
-        let mut next_states = vec![];
+        let mut next_states = HashSet::new();
+
         while game
             .piece
             .iter_blocks()
@@ -72,7 +78,7 @@ impl Entity {
         let mut piece_positions_visited: HashSet<Piece> = HashSet::new();
         while let Some(popped_game) = games_stack.pop_front() {
             if popped_game.piece_recently_dropped {
-                next_states.push(popped_game);
+                next_states.insert(popped_game.board);
                 continue;
             }
 
@@ -90,11 +96,11 @@ impl Entity {
             piece_positions_visited.insert(popped_game.piece.clone());
         }
 
-        next_states
+        next_states.into_iter().collect()
     }
 
     #[must_use]
-    pub fn calculate_weighted_heuristic(&self) -> HeuristicScore {
+    pub fn forward(&self) -> HeuristicScore {
         self.weights
             .iter()
             .zip(HEURISTICS.iter())

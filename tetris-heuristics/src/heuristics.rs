@@ -63,7 +63,7 @@ pub fn bumpyness(state: &Game) -> HeuristicScore {
 /// Maximum minus minumum height of all the columns.
 #[must_use]
 pub fn relative_diff(state: &Game) -> HeuristicScore {
-    let heights = dbg!(get_cols_max_heights(state));
+    let heights = get_cols_max_heights(state);
     let max = heights.iter().max().copied().unwrap_or_default() as f32;
     let min = heights.iter().min().copied().unwrap_or_default() as f32;
     max - min
