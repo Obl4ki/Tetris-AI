@@ -4,6 +4,8 @@ use itertools::Itertools;
 use serde::{Deserialize, Serialize};
 
 use crate::entities::{Coord, PieceType};
+use colored::customcolors::CustomColor;
+use colored::Colorize;
 
 const W: usize = 10;
 const H: usize = 23;
@@ -27,11 +29,13 @@ impl Board {
         }
     }
 
+    #[inline]
     pub fn set(&mut self, block_type: Option<PieceType>, loc: Coord<usize>) {
         self.grid[loc.x][loc.y] = block_type;
     }
 
     #[must_use]
+    #[inline]
     pub fn get(&self, loc: Coord<i32>) -> Option<PieceType> {
         let col = self.grid.get(loc.x as usize)?;
         let element = col.get(loc.y as usize)?;
@@ -90,14 +94,18 @@ impl Display for Board {
 
             for x in 0..W {
                 let cell = self.get(Coord::new(x as i32, y as i32));
-                let cell_str = cell.map_or(" - ", |block| match block {
-                    PieceType::I => " I ",
-                    PieceType::O => " O ",
-                    PieceType::T => " T ",
-                    PieceType::S => " S ",
-                    PieceType::Z => " Z ",
-                    PieceType::J => " J ",
-                    PieceType::L => " L ",
+                let cell_str = cell.map_or("   ".black(), |block| match block {
+                    PieceType::I => " I ".cyan(),
+                    PieceType::O => " O ".yellow(),
+                    PieceType::T => " T ".purple(),
+                    PieceType::S => " S ".green(),
+                    PieceType::Z => " Z ".red(),
+                    PieceType::J => " J ".blue(),
+                    PieceType::L => " L ".custom_color(CustomColor {
+                        r: 255,
+                        g: 165,
+                        b: 0,
+                    }),
                 });
 
                 write!(f, "{cell_str}")?;

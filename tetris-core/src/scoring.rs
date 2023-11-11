@@ -4,9 +4,9 @@ use serde::{Deserialize, Serialize};
     Debug, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy, Serialize, Deserialize,
 )]
 pub struct Score {
-    cleared_rows: usize,
-    score: usize,
-    dropped_pieces: usize,
+    pub cleared_rows: usize,
+    pub score: usize,
+    pub dropped_pieces: usize,
 }
 
 impl Score {

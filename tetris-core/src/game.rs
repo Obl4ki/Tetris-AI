@@ -14,7 +14,6 @@ pub struct Game {
     pub width: i32,
     pub height: i32,
     pub score: Score,
-    pub piece_recently_dropped: bool,
 }
 
 impl Game {
@@ -26,7 +25,6 @@ impl Game {
             width: 10,
             height: 20,
             score: Score::default(),
-            piece_recently_dropped: false,
         }
     }
 
@@ -67,23 +65,18 @@ impl Game {
     }
 
     pub fn go_left(&mut self) {
-        self.piece_recently_dropped = false;
         if self.get_collision_after_move(Direction::Left, &self.piece) == Collision::None {
             self.piece.anchor_point.x -= 1;
         }
     }
 
     pub fn go_right(&mut self) {
-        self.piece_recently_dropped = false;
-
         if self.get_collision_after_move(Direction::Right, &self.piece) == Collision::None {
             self.piece.anchor_point.x += 1;
         }
     }
 
     pub fn go_down(&mut self) {
-        self.piece_recently_dropped = false;
-
         if self.get_collision_after_move(Direction::Down, &self.piece) == Collision::None {
             self.piece.anchor_point.y -= 1;
         } else {
@@ -100,8 +93,6 @@ impl Game {
     }
 
     pub fn rotate(&mut self, rotation: Rotation) {
-        self.piece_recently_dropped = false;
-
         let original_piece = self.piece.clone();
 
         let old_rot_idx = self.piece.rotation_idx;
@@ -130,7 +121,6 @@ impl Game {
     }
 
     fn on_drop(&mut self) {
-        self.piece_recently_dropped = true;
         self.set_piece_blocks_into_board();
         let n_cleans = self.board.delete_full_lines(
             self.piece
@@ -146,6 +136,7 @@ impl Game {
     }
     fn set_piece_blocks_into_board(&mut self) {
         for piece_coords in self.piece.iter_blocks() {
+            if piece_coords.y >= self.height { continue; }
             self.board.set(
                 Some(self.piece.block_type),
                 piece_coords

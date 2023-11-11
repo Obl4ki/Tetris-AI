@@ -11,7 +11,7 @@ use tetris_heuristics::{
 use lazy_static::lazy_static;
 
 lazy_static! {
-    static ref HEURISTICS: Vec<fn(&Game) -> HeuristicScore> =
+    static ref HEURISTICS: Vec<fn(&Board) -> HeuristicScore> =
         vec![holes_present, highest_block, bumpyness, relative_diff];
 }
 
@@ -31,24 +31,34 @@ impl Entity {
     #[must_use]
     pub fn new() -> Self {
         let rng = rand::thread_rng();
-        let dist = Uniform::from(0.0..1.0);
+        let dist = Uniform::from(0.0..10.0);
         let n_weights = HEURISTICS.len();
-        let center_offset = 0.5;
         Self {
             game: Game::new(),
-            weights: dist
-                .sample_iter(rng)
-                .take(n_weights)
-                .map(|x| x - center_offset)
-                .collect(),
+            weights: dist.sample_iter(rng).take(n_weights).collect(),
         }
     }
 
+    // allow panic and dont require documenting - panics only when weights are NaN, which is never the case.
+    #[allow(clippy::missing_panics_doc)]
+    pub fn next_best_state(&mut self, piece: Piece) {
+        let mut best_game = self
+            .get_all_possible_next_game_states()
+            .into_iter()
+            .min_by(|a, b| {
+                self.forward_with_board(&a.board)
+                    .total_cmp(&self.forward_with_board(&b.board))
+            }).expect("There are always some new states and each of them has a rating, so there must be a maximum.");
+
+        best_game.piece = piece;
+        self.game = best_game;
+    }
+
     const ACTIONS: [fn(&mut Game); 6] = [
+        Game::hard_drop,
         Game::go_down,
         Game::go_left,
         Game::go_right,
-        Game::hard_drop,
         |game| game.rotate(Rotation::Counterclockwise),
         |game| game.rotate(Rotation::Clockwise),
     ];
@@ -60,25 +70,21 @@ impl Entity {
     ///
     /// Use hashset to delete pieces that were previously branched out to avoid repetition.
     #[must_use]
-    #[allow(clippy::cast_possible_truncation)]
-    pub fn get_all_possible_next_game_states(&self) -> Vec<Board> {
-        let mut game = self.game.clone();
-        let max_height = highest_block(&game);
-        let mut next_states = HashSet::new();
+    pub fn get_all_possible_next_game_states(&self) -> Vec<Game> {
+        let game = self.game.clone();
+        // let max_height = highest_block(&game.board);
 
-        while game
-            .piece
-            .iter_blocks()
-            .any(|pos| pos.y <= max_height as i32)
-        {
-            game.go_down();
-        }
+        let n_dropped_pieces = game.score.dropped_pieces;
+
+        // lower_piece_before_branching(&mut game, max_height);
 
         let mut games_stack = VecDeque::from([game]);
+        let mut next_states = HashSet::new();
         let mut piece_positions_visited: HashSet<Piece> = HashSet::new();
+
         while let Some(popped_game) = games_stack.pop_front() {
-            if popped_game.piece_recently_dropped {
-                next_states.insert(popped_game.board);
+            if popped_game.score.dropped_pieces == n_dropped_pieces + 1 {
+                next_states.insert(popped_game);
                 continue;
             }
 
@@ -101,10 +107,26 @@ impl Entity {
 
     #[must_use]
     pub fn forward(&self) -> HeuristicScore {
+        self.forward_with_board(&self.game.board)
+    }
+
+    #[must_use]
+    pub fn forward_with_board(&self, board: &Board) -> HeuristicScore {
         self.weights
             .iter()
             .zip(HEURISTICS.iter())
-            .map(|(weight, h)| h(&self.game) * weight)
+            .map(|(weight, h)| h(board) * weight)
             .sum()
     }
 }
+
+// #[allow(clippy::cast_possible_truncation)]
+// fn lower_piece_before_branching(game: &mut Game, max_height: f32) {
+//     while game
+//         .piece
+//         .iter_blocks()
+//         .any(|pos| pos.y <= max_height as i32)
+//     {
+//         game.go_down();
+//     }
+// }

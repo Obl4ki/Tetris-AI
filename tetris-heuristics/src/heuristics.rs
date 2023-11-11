@@ -1,14 +1,14 @@
 use itertools::Itertools;
-use tetris_core::{entities::Coord, prelude::Game};
+use tetris_core::{entities::Coord, prelude::Board};
 
 pub type HeuristicScore = f32;
 
 /// Helper method to get height of each individual column in the tetris board.
 #[must_use]
-fn get_cols_max_heights(state: &Game) -> [usize; 10] {
+fn get_cols_max_heights(state: &Board) -> [usize; 10] {
     let mut highest_blocks_x_axis = [0; 10];
 
-    for (coord, _block) in state.board.iter_blocks() {
+    for (coord, _block) in state.iter_blocks() {
         if coord.y > highest_blocks_x_axis[coord.x] {
             highest_blocks_x_axis[coord.x] = coord.y;
         }
@@ -20,14 +20,14 @@ fn get_cols_max_heights(state: &Game) -> [usize; 10] {
 /// Holes are defined as cells with no blocks that have some block above them.
 /// Distance to top block can be greater than one.
 #[must_use]
-pub fn holes_present(state: &Game) -> HeuristicScore {
+pub fn holes_present(state: &Board) -> HeuristicScore {
     let mut score = 0.;
     let highest_blocks_x_axis = get_cols_max_heights(state);
 
     for (x, highest_y) in highest_blocks_x_axis.into_iter().enumerate() {
         score += (0..highest_y)
             .rev()
-            .filter(|y| state.board.get(Coord::new(x as i32, *y as i32)).is_none())
+            .filter(|y| state.get(Coord::new(x as i32, *y as i32)).is_none())
             .count() as f32;
     }
 
@@ -36,9 +36,8 @@ pub fn holes_present(state: &Game) -> HeuristicScore {
 
 /// Measures the height of the highest block in the entire tetris board.
 #[must_use]
-pub fn highest_block(state: &Game) -> HeuristicScore {
+pub fn highest_block(state: &Board) -> HeuristicScore {
     state
-        .board
         .iter_blocks()
         .map(|(coord, _)| coord.y)
         .max()
@@ -49,7 +48,7 @@ pub fn highest_block(state: &Game) -> HeuristicScore {
 /// Measures the "bumpyness" of the columns in the grid.
 /// This means that difference in heights of each individual next and previous columns will be summed.
 #[must_use]
-pub fn bumpyness(state: &Game) -> HeuristicScore {
+pub fn bumpyness(state: &Board) -> HeuristicScore {
     let highest_blocks_x_axis = get_cols_max_heights(state);
 
     let mut score = 0.;
@@ -62,7 +61,7 @@ pub fn bumpyness(state: &Game) -> HeuristicScore {
 
 /// Maximum minus minumum height of all the columns.
 #[must_use]
-pub fn relative_diff(state: &Game) -> HeuristicScore {
+pub fn relative_diff(state: &Board) -> HeuristicScore {
     let heights = get_cols_max_heights(state);
     let max = heights.iter().max().copied().unwrap_or_default() as f32;
     let min = heights.iter().min().copied().unwrap_or_default() as f32;
@@ -90,7 +89,7 @@ mod tests {
             .add_piece(PT::I, Coord::new(2, 5))
             .add_piece(PT::I, Coord::new(5, 9))
             .build();
-        let heights = get_cols_max_heights(&game);
+        let heights = get_cols_max_heights(&game.board);
 
         assert_eq!(heights, [0, 1, 5, 0, 0, 9, 0, 0, 0, 0]);
     }
@@ -104,7 +103,7 @@ mod tests {
             .add_piece(PT::I, Coord::new(0, 3))
             .build();
 
-        let res = highest_block(&game);
+        let res = highest_block(&game.board);
         assert!((res - 4.).abs() < f32::EPSILON);
     }
 
@@ -117,7 +116,7 @@ mod tests {
             .add_piece(PT::I, Coord::new(4, 4))
             .build();
 
-        let res = highest_block(&game);
+        let res = highest_block(&game.board);
         assert!((res - 6.).abs() < f32::EPSILON);
     }
 
@@ -135,7 +134,7 @@ mod tests {
             .add_piece(PT::I, Coord::new(8, 2))
             .add_piece(PT::I, Coord::new(9, 2))
             .build();
-        let res = bumpyness(&game);
+        let res = bumpyness(&game.board);
         assert!((res - 12.).abs() < f32::EPSILON);
     }
 
@@ -147,7 +146,7 @@ mod tests {
             .add_piece(PT::I, Coord::new(2, 7))
             .build();
 
-        let res = relative_diff(&game);
+        let res = relative_diff(&game.board);
         assert!((res - 7.).abs() < f32::EPSILON);
     }
 
@@ -159,7 +158,7 @@ mod tests {
             .add_piece(PT::I, Coord::new(3, 3))
             .build();
 
-        let res = holes_present(&game);
+        let res = holes_present(&game.board);
         assert!((res - 4.).abs() < f32::EPSILON);
     }
 }

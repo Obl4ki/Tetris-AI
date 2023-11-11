@@ -57,6 +57,11 @@ impl Piece {
         }
     }
 
+    #[must_use]
+    pub fn random() -> Self {
+        rand::random()
+    }
+
     pub fn iter_blocks(&self) -> impl Iterator<Item = Coord<i32>> + '_ {
         self.block_positions
             .iter()
