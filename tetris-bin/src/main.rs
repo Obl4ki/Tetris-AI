@@ -1,3 +1,5 @@
+use std::{thread::sleep, time::Duration};
+
 // use bevy::prelude::*;
 use tetris_core::prelude::*;
 
@@ -8,7 +10,7 @@ use tetris_core::prelude::*;
 // mod tetris_game_resource;
 // use bevy::core_pipeline::prelude::ClearColor;
 // use tetris_game_resource::TetrisGameResource;
-use tetris_ml::population;
+use tetris_ml::population::{self, Population};
 
 use anyhow::Result;
 
@@ -22,22 +24,46 @@ fn main() -> Result<()> {
 }
 
 fn populations() {
-    let mut start_population = population::Population::new(100, 0.98, 0.02);
+    let mut population = population::Population::new(100, 0.98, 0.02, Some(2000));
 
-    println!("{}", start_population.entities.len());
-    start_population = start_population.advance();
-    println!("{}", start_population.entities.len());
-    println!(
-        "First 3: {:#?}",
-        start_population
-            .entities
+    for idx in 1..10 {
+        println!("-----------------------------------------------------");
+        println!("Gen {}", idx);
+        println!("Num of entities before: {}", population.entities.len());
+        population = population.advance();
+        println!("Num of entities after: {}", population.entities.len());
+
+        let best_entity = population
+            .sorted_by_performance()
             .into_iter()
-            .take(3)
-            .map(|e| e.game.score)
-            .collect::<Vec<_>>()
-    );
+            .next()
+            .unwrap();
+
+        println!("Best entity statistics:");
+        println!("Weights: {:?}", best_entity.weights);
+        println!("Score: {:?}", best_entity.game.score);
+        println!("Fitness: {:?}", population.fitness(best_entity));
+    }
+
+    let best_entity = population
+        .sorted_by_performance()
+        .into_iter()
+        .next()
+        .unwrap();
+
+    while let Some(entity) = best_entity.next_best_state(Piece::random()) {
+        clearscreen::clear().unwrap();
+        if entity.game.score.dropped_pieces & 2047 == 2047 {
+            println!("Metaheuristic: {}", entity.forward());
+            println!("Score: {:?}", entity.game.score);
+        }
+        println!("{}", entity.game.board);
+
+        sleep(Duration::from_millis(200));
+    }
 }
 
+#[allow(unused)]
 fn randoms() {
     let mut best_weights = Default::default();
     let mut best_dropped_pieces = 0;

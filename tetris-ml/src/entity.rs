@@ -39,6 +39,18 @@ impl Entity {
         }
     }
 
+    #[must_use]
+    pub fn from_weights(weights: Vec<f32>) -> Option<Self> {
+        if weights.len() != HEURISTICS.len() {
+            return None;
+        }
+
+        Some(Self {
+            game: Game::new(),
+            weights,
+        })
+    }
+
     // allow panic and dont require documenting - panics only when weights are NaN, which is never the case.
     #[allow(clippy::missing_panics_doc)]
     #[must_use]

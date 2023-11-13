@@ -12,3 +12,4 @@ rand = { version = "0.8.5", features = ["alloc"] }
 lazy_static = "1.4.0"
 clearscreen = "2.0.1"
 rayon = "1.8.0"
+indicatif = {version = "*", features = ["rayon"]}
