@@ -136,7 +136,6 @@ impl Game {
     }
     fn set_piece_blocks_into_board(&mut self) {
         for piece_coords in self.piece.iter_blocks() {
-            if piece_coords.y >= self.height { continue; }
             self.board.set(
                 Some(self.piece.block_type),
                 piece_coords

@@ -8,7 +8,7 @@ use colored::customcolors::CustomColor;
 use colored::Colorize;
 
 const W: usize = 10;
-const H: usize = 23;
+const H: usize = 24;
 
 #[derive(Clone, Debug, Serialize, Deserialize, Hash, PartialEq, Eq)]
 pub struct Board {

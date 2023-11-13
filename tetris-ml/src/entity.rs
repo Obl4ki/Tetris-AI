@@ -41,17 +41,21 @@ impl Entity {
 
     // allow panic and dont require documenting - panics only when weights are NaN, which is never the case.
     #[allow(clippy::missing_panics_doc)]
-    pub fn next_best_state(&mut self, piece: Piece) {
-        let mut best_game = self
-            .get_all_possible_next_game_states()
+    #[must_use]
+    pub fn next_best_state(&self, piece: Piece) -> Option<Self> {
+        self.get_all_possible_next_game_states()
             .into_iter()
             .min_by(|a, b| {
                 self.forward_with_board(&a.board)
                     .total_cmp(&self.forward_with_board(&b.board))
-            }).expect("There are always some new states and each of them has a rating, so there must be a maximum.");
-
-        best_game.piece = piece;
-        self.game = best_game;
+            })
+            .map(|mut best_game| {
+                best_game.piece = piece;
+                Self {
+                    game: best_game,
+                    weights: self.weights.clone(),
+                }
+            })
     }
 
     const ACTIONS: [fn(&mut Game); 6] = [
@@ -64,25 +68,27 @@ impl Entity {
     ];
 
     /// Implementation of an algorithm to discover and collect all possible game states after 1 piece drop.
-    /// At first, the piece is dropped one by one until it is exactly 1 level above the highest block in the grid.
-    /// Then we check every option with DFS algorithm using branching by every possible move.
+    /// Check every option with DFS algorithm using branching by every possible move.
     /// Next game states' boards are unique.
     ///
     /// Use hashset to delete pieces that were previously branched out to avoid repetition.
     #[must_use]
     pub fn get_all_possible_next_game_states(&self) -> Vec<Game> {
-        let game = self.game.clone();
-        // let max_height = highest_block(&game.board);
+        let mut game = self.game.clone();
 
         let n_dropped_pieces = game.score.dropped_pieces;
 
-        // lower_piece_before_branching(&mut game, max_height);
+        lower_piece_before_branching(&mut game);
 
         let mut games_stack = VecDeque::from([game]);
         let mut next_states = HashSet::new();
         let mut piece_positions_visited: HashSet<Piece> = HashSet::new();
 
         while let Some(popped_game) = games_stack.pop_front() {
+            if popped_game.is_lost() {
+                continue;
+            }
+
             if popped_game.score.dropped_pieces == n_dropped_pieces + 1 {
                 next_states.insert(popped_game);
                 continue;
@@ -120,13 +126,12 @@ impl Entity {
     }
 }
 
-// #[allow(clippy::cast_possible_truncation)]
-// fn lower_piece_before_branching(game: &mut Game, max_height: f32) {
-//     while game
-//         .piece
-//         .iter_blocks()
-//         .any(|pos| pos.y <= max_height as i32)
-//     {
-//         game.go_down();
-//     }
-// }
+#[allow(clippy::cast_possible_truncation)]
+fn lower_piece_before_branching(game: &mut Game) {
+    let lowest_piece_block = game.piece.iter_blocks().map(|pos| pos.y).min().unwrap();
+    let highest_grid_block = highest_block(&game.board) as i32;
+    let dist_to_lower = lowest_piece_block - highest_grid_block;
+    for _ in 0..dist_to_lower {
+        game.go_down();
+    }
+}

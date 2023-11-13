@@ -1,4 +1,3 @@
-#![allow(unused)]
 // use bevy::prelude::*;
 use tetris_core::prelude::*;
 
@@ -9,30 +8,66 @@ use tetris_core::prelude::*;
 // mod tetris_game_resource;
 // use bevy::core_pipeline::prelude::ClearColor;
 // use tetris_game_resource::TetrisGameResource;
-use tetris_ml::population::Population;
+use tetris_ml::population;
 
-use std::{process::Command, thread::sleep, time::Duration};
 use anyhow::Result;
 
 fn main() -> Result<()> {
     // run_game();
+    // randoms();
 
-    let mut entity = tetris_ml::entity::Entity::new();
-
-    while !entity.game.is_lost() {
-        clearscreen::clear().unwrap();
-        println!();
-        println!("Metaheuristic: {}", entity.forward());
-        println!("Score: {:?}", entity.game.score);
-        println!("{}", entity.game.board);
-        entity.next_best_state(Piece::random());
-
-        // sleep(Duration::from_millis(100));
-    }
+    populations();
 
     Ok(())
 }
 
+fn populations() {
+    let mut start_population = population::Population::new(100, 0.98, 0.02);
+
+    println!("{}", start_population.entities.len());
+    start_population = start_population.advance();
+    println!("{}", start_population.entities.len());
+    println!(
+        "First 3: {:#?}",
+        start_population
+            .entities
+            .into_iter()
+            .take(3)
+            .map(|e| e.game.score)
+            .collect::<Vec<_>>()
+    );
+}
+
+fn randoms() {
+    let mut best_weights = Default::default();
+    let mut best_dropped_pieces = 0;
+
+    loop {
+        let mut entity = tetris_ml::entity::Entity::new();
+
+        while let Some(next_entity) = entity.next_best_state(Piece::random()) {
+            entity = next_entity;
+            // // clearscreen::clear().unwrap();
+            // // if entity.game.score.dropped_pieces & 2047 == 2047 {
+            //     println!("Metaheuristic: {}", entity.forward());
+            //     println!("Score: {:?}", entity.game.score);
+            // // }
+            // println!("{}", entity.game.board);
+
+            // sleep(Duration::from_millis(200));
+        }
+
+        println!("Entity final score: {:?}", entity.game.score);
+        if entity.game.score.dropped_pieces > best_dropped_pieces {
+            best_weights = entity.weights.clone();
+            best_dropped_pieces = entity.game.score.dropped_pieces;
+            println!(
+                "New best weights: {:?} with {:?}",
+                best_weights, entity.game.score
+            );
+        }
+    }
+}
 
 // fn run_game() {
 //     App::new()

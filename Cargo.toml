@@ -2,6 +2,10 @@
 members = ["tetris-bin", "tetris-core", "tetris-heuristics", "tetris-ml"]
 resolver = "2"
 
+[profile.release]
+lto = true
+panic = "abort"
+
 # Enable only a small amount of optimization in debug mode
 [profile.dev]
 opt-level = 1
