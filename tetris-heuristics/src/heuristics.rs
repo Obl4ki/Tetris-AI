@@ -2,6 +2,7 @@ use itertools::Itertools;
 use tetris_core::{entities::Coord, prelude::Board};
 
 pub type HeuristicScore = f32;
+pub type Heuristic = fn(&Board) -> HeuristicScore;
 
 /// Helper method to get height of each individual column in the tetris board.
 #[must_use]

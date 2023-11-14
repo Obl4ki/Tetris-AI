@@ -592,6 +592,7 @@ dependencies = [
  "anyhow",
  "clearscreen",
  "tetris-core",
+ "tetris-heuristics",
  "tetris-ml",
 ]
 

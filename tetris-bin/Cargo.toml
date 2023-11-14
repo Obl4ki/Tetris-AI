@@ -16,3 +16,4 @@ clearscreen = "2.0.1"
 # ] }
 tetris-core = { path = "../tetris-core" }
 tetris-ml = { path = "../tetris-ml" }
+tetris-heuristics = { path = "../tetris-heuristics" }

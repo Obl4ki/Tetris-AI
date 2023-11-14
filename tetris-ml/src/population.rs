@@ -1,17 +1,18 @@
-use std::{cmp::Ordering, ops};
+use std::{cmp::Ordering, ops, sync::Arc};
 
+use anyhow::Result;
 use rand::{
     distributions::WeightedIndex, prelude::Distribution, seq::SliceRandom, thread_rng, Rng,
 };
 use rayon::prelude::*;
-use serde::{Deserialize, Serialize};
 use tetris_core::prelude::*;
 
 use crate::entity::Entity;
+use crate::model_config::Config;
 use indicatif::{ParallelProgressIterator, ProgressStyle};
 use rayon::iter::ParallelIterator;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone)]
 pub struct Population {
     pub entities: Vec<Entity>,
     crossover_rate: f64,
@@ -21,21 +22,25 @@ pub struct Population {
 }
 
 impl Population {
-    #[must_use]
-    pub fn new(
-        n_entities: usize,
-        crossover_rate: f64,
-        mutation_rate: f64,
-        max_drops: Option<usize>,
-    ) -> Self {
-        let entities: Vec<Entity> = (0..n_entities).map(|_| Entity::new()).collect();
-        Self {
+    /// # Errors
+    ///
+    /// This function will return an error if validation of [`Config`] fails.
+    /// See [`Config::validate`] for more details.
+    pub fn new(config: Config) -> Result<Self> {
+        config.validate()?;
+
+        let heuristics_ref = Arc::new(config.heuristics_used);
+        let entities: Vec<Entity> = (0..config.n_entities)
+            .map(|_| Entity::new(Arc::clone(&heuristics_ref)))
+            .collect();
+
+        Ok(Self {
             n_weights: entities[0].weights.len(),
             entities,
-            crossover_rate,
-            mutation_rate,
-            max_drops,
-        }
+            crossover_rate: config.crossover_rate,
+            mutation_rate: config.mutation_rate,
+            max_drops: config.max_drops,
+        })
     }
 
     #[must_use]
@@ -83,21 +88,21 @@ impl Population {
 
     #[must_use]
     #[allow(clippy::cast_precision_loss)]
-    pub fn fitness(&self, entity: &Entity) -> f64 {
-        let dropped = entity.game.score.dropped_pieces;
-        let cleared = entity.game.score.cleared_rows;
-        if dropped == 0 {
-            return 0.;
-        }
+    pub const fn fitness(&self, entity: &Entity) -> f64 {
+        // let dropped = entity.game.score.dropped_pieces;
+        // let cleared = entity.game.score.cleared_rows;
+        // if dropped == 0 {
+        //     return 0.;
+        // }
 
-        let mut score = (cleared / dropped + 1) as f64;
+        // let mut score = cleared as f64;
 
-        // apply penalty for not reaching the goal of n drops
-        if let Some(max_drops) = self.max_drops {
-            score /= (max_drops / dropped) as f64;
-        }
+        // // apply penalty for not reaching the goal of n drops
+        // if let Some(max_drops) = self.max_drops {
+        //     score /= (max_drops / dropped) as f64;
+        // }
 
-        score
+        entity.game.score.score as f64
     }
 
     #[must_use]
@@ -156,10 +161,7 @@ impl Population {
                             .copied()
                             .collect();
 
-                        Entity {
-                            game: Game::new(),
-                            weights: new_weights,
-                        }
+                        Entity::from_weights(new_weights, &entities[0].heuristics).unwrap()
                     })
                     .collect::<Vec<Entity>>()
             })

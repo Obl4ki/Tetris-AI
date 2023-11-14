@@ -5,5 +5,6 @@
 #![allow(clippy::cast_precision_loss)]
 
 pub mod heuristics;
+pub mod prelude;
 
-pub use heuristics::{highest_block, holes_present};
+pub use crate::prelude::*;

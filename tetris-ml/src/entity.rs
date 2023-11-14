@@ -1,58 +1,50 @@
 use std::collections::{HashSet, VecDeque};
 
+use anyhow::{bail, Result};
 use rand::distributions::{Distribution, Uniform};
-use serde::{Deserialize, Serialize};
+use std::sync::Arc;
 use tetris_core::prelude::{Board, Game, Piece, Rotation};
-use tetris_heuristics::{
-    heuristics::{bumpyness, relative_diff, HeuristicScore},
-    highest_block, holes_present,
-};
+use tetris_heuristics::prelude::*;
 
-use lazy_static::lazy_static;
-
-lazy_static! {
-    static ref HEURISTICS: Vec<fn(&Board) -> HeuristicScore> =
-        vec![holes_present, highest_block, bumpyness, relative_diff];
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone)]
 pub struct Entity {
     pub game: Game,
     pub weights: Vec<f32>,
-}
-
-impl Default for Entity {
-    fn default() -> Self {
-        Self::new()
-    }
+    pub heuristics: Arc<Vec<Heuristic>>,
 }
 
 impl Entity {
     #[must_use]
-    pub fn new() -> Self {
+    pub fn new(heuristics: Arc<Vec<Heuristic>>) -> Self {
         let rng = rand::thread_rng();
         let dist = Uniform::from(0.0..10.0);
-        let n_weights = HEURISTICS.len();
+        let n_weights = heuristics.len();
         Self {
             game: Game::new(),
             weights: dist.sample_iter(rng).take(n_weights).collect(),
+            heuristics,
         }
     }
 
-    #[must_use]
-    pub fn from_weights(weights: Vec<f32>) -> Option<Self> {
-        if weights.len() != HEURISTICS.len() {
-            return None;
+    /// # Errors
+    ///
+    /// This function will return an error if weights length don't match the number of heuristics passed.
+    pub fn from_weights(weights: Vec<f32>, heuristics: &[Heuristic]) -> Result<Self> {
+        if weights.len() != heuristics.len() {
+            bail!(
+                "Weights size doesn't match: passed: {}, expected: {}",
+                weights.len(),
+                heuristics.len()
+            );
         }
 
-        Some(Self {
+        Ok(Self {
             game: Game::new(),
             weights,
+            heuristics: Arc::new(heuristics.to_vec()),
         })
     }
 
-    // allow panic and dont require documenting - panics only when weights are NaN, which is never the case.
-    #[allow(clippy::missing_panics_doc)]
     #[must_use]
     pub fn next_best_state(&self, piece: Piece) -> Option<Self> {
         self.get_all_possible_next_game_states()
@@ -66,6 +58,7 @@ impl Entity {
                 Self {
                     game: best_game,
                     weights: self.weights.clone(),
+                    heuristics: self.heuristics.clone(),
                 }
             })
     }
@@ -132,7 +125,7 @@ impl Entity {
     pub fn forward_with_board(&self, board: &Board) -> HeuristicScore {
         self.weights
             .iter()
-            .zip(HEURISTICS.iter())
+            .zip(self.heuristics.iter())
             .map(|(weight, h)| h(board) * weight)
             .sum()
     }
