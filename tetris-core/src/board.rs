@@ -89,11 +89,11 @@ impl Board {
 
 impl Display for Board {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        for y in (0..H).rev() {
+        for y in (0..20).rev() {
             write!(f, "[")?;
 
-            for x in 0..W {
-                let cell = self.get(Coord::new(x as i32, y as i32));
+            for x in 0..10 {
+                let cell = self.get(Coord::new(x, y));
                 let cell_str = cell.map_or("   ".black(), |block| match block {
                     PieceType::I => " I ".cyan(),
                     PieceType::O => " O ".yellow(),

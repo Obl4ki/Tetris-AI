@@ -7,6 +7,8 @@ pub struct Config {
     pub crossover_rate: f64,
     pub mutation_rate: f64,
     pub max_drops: Option<usize>,
+    pub max_populations: Option<usize>,
+    pub max_non_progress_populations: Option<usize>,
     pub heuristics_used: Vec<Heuristic>,
 }
 
@@ -29,7 +31,6 @@ impl Config {
         if self.heuristics_used.is_empty() {
             bail!("Heuristics cannot be empty!")
         }
-
         Ok(())
     }
 }

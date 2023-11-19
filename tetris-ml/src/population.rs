@@ -26,10 +26,11 @@ impl Population {
     ///
     /// This function will return an error if validation of [`Config`] fails.
     /// See [`Config::validate`] for more details.
-    pub fn new(config: Config) -> Result<Self> {
+    pub fn new(config: &Config) -> Result<Self> {
         config.validate()?;
 
-        let heuristics_ref = Arc::new(config.heuristics_used);
+        let heuristics_ref = Arc::new(config.heuristics_used.clone());
+
         let entities: Vec<Entity> = (0..config.n_entities)
             .map(|_| Entity::new(Arc::clone(&heuristics_ref)))
             .collect();
@@ -88,20 +89,7 @@ impl Population {
 
     #[must_use]
     #[allow(clippy::cast_precision_loss)]
-    pub const fn fitness(&self, entity: &Entity) -> f64 {
-        // let dropped = entity.game.score.dropped_pieces;
-        // let cleared = entity.game.score.cleared_rows;
-        // if dropped == 0 {
-        //     return 0.;
-        // }
-
-        // let mut score = cleared as f64;
-
-        // // apply penalty for not reaching the goal of n drops
-        // if let Some(max_drops) = self.max_drops {
-        //     score /= (max_drops / dropped) as f64;
-        // }
-
+    pub const fn fitness(entity: &Entity) -> f64 {
         entity.game.score.score as f64
     }
 
@@ -109,11 +97,7 @@ impl Population {
     // Rulette selection
     #[allow(clippy::missing_panics_doc)]
     pub fn selection(self) -> Self {
-        let raw_probs: Vec<f64> = self
-            .entities
-            .iter()
-            .map(|entity| self.fitness(entity))
-            .collect();
+        let raw_probs: Vec<f64> = self.entities.iter().map(Self::fitness).collect();
 
         let norm_min = *raw_probs
             .iter()
@@ -145,6 +129,7 @@ impl Population {
     }
 
     #[must_use]
+    #[allow(clippy::missing_panics_doc)]
     pub fn crossover(self) -> Self {
         let offsprings = self
             .entities
@@ -216,7 +201,15 @@ impl Population {
     pub fn sorted_by_performance(&self) -> Vec<&Entity> {
         let mut entity_refs = self.entities.iter().collect::<Vec<_>>();
 
-        entity_refs.sort_unstable_by(|x, y| self.fitness(y).total_cmp(&self.fitness(x)));
+        entity_refs.sort_unstable_by(|x, y| Self::fitness(y).total_cmp(&Self::fitness(x)));
         entity_refs
+    }
+
+    #[must_use]
+    #[allow(clippy::missing_panics_doc)]
+    pub fn get_best_entity(&self) -> &Entity {
+        self.sorted_by_performance()
+            .first()
+            .expect("Population cannot be empty.")
     }
 }
