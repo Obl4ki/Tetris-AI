@@ -110,7 +110,7 @@ impl Entity {
                 games_stack.push_front(branched_game);
             }
 
-            piece_positions_visited.insert(popped_game.piece.clone());
+            piece_positions_visited.insert(popped_game.piece);
         }
 
         next_states.into_iter().collect()

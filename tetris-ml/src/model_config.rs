@@ -4,7 +4,6 @@ use tetris_heuristics::Heuristic;
 #[derive(Debug, Clone)]
 pub struct Config {
     pub n_entities: usize,
-    pub crossover_rate: f64,
     pub mutation_rate: f64,
     pub max_drops: Option<usize>,
     pub max_populations: Option<usize>,

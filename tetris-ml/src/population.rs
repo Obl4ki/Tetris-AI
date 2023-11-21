@@ -15,7 +15,6 @@ use rayon::iter::ParallelIterator;
 #[derive(Debug, Clone)]
 pub struct Population {
     pub entities: Vec<Entity>,
-    crossover_rate: f64,
     mutation_rate: f64,
     n_weights: usize,
     max_drops: Option<usize>,
@@ -38,7 +37,6 @@ impl Population {
         Ok(Self {
             n_weights: entities[0].weights.len(),
             entities,
-            crossover_rate: config.crossover_rate,
             mutation_rate: config.mutation_rate,
             max_drops: config.max_drops,
         })
@@ -80,7 +78,6 @@ impl Population {
 
         Self {
             entities: completed_population,
-            crossover_rate: self.crossover_rate,
             mutation_rate: self.mutation_rate,
             n_weights: self.n_weights,
             max_drops: self.max_drops,
@@ -121,7 +118,6 @@ impl Population {
 
         Self {
             entities: new_population,
-            crossover_rate: self.crossover_rate,
             mutation_rate: self.mutation_rate,
             n_weights: self.n_weights,
             max_drops: self.max_drops,
@@ -156,7 +152,6 @@ impl Population {
 
         Self {
             entities: new_population,
-            crossover_rate: self.crossover_rate,
             mutation_rate: self.mutation_rate,
             n_weights: self.n_weights,
             max_drops: self.max_drops,
@@ -182,7 +177,6 @@ impl Population {
 
         Self {
             entities: new_population,
-            crossover_rate: self.crossover_rate,
             mutation_rate: self.mutation_rate,
             n_weights: self.n_weights,
             max_drops: self.max_drops,

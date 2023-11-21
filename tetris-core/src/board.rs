@@ -10,7 +10,7 @@ use colored::Colorize;
 const W: usize = 10;
 const H: usize = 24;
 
-#[derive(Clone, Debug, Serialize, Deserialize, Hash, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, Serialize, Deserialize, Hash, PartialEq, Eq)]
 pub struct Board {
     grid: [[Option<PieceType>; H]; W],
 }

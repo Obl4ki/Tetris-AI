@@ -33,31 +33,34 @@ impl GA {
 
     pub fn train(&mut self, print_info: bool) {
         if print_info {
-            println!("-----------------------------------------------------------");
             println!("Starting generation: {}", self.populations.len() - 1);
             println!("Best entity:");
             println!("Score: {:?}", self.best_entity.game.score);
             println!("Fitness: {:?}", Population::fitness(&self.best_entity));
             println!("Weights: {:?}", self.best_entity.weights);
+            println!("-----------------------------------------------------------");
         }
         while self.advance().is_some() {
             if print_info {
-                println!("-----------------------------------------------------------");
                 println!("Generation {}:", self.populations.len() - 1);
                 println!("Best entity so far:");
                 println!("Score: {:?}", self.best_entity.game.score);
                 println!("Fitness: {:?}", Population::fitness(&self.best_entity));
                 println!("Weights: {:?}", self.best_entity.weights);
+                println!("-----------------------------------------------------------");
             }
         }
     }
 
     pub fn advance(&mut self) -> Option<&Population> {
-        if let Some(counter) = self.max_non_progress {
-            if counter == 0 {
-                return None;
-            }
+        if matches!(self.max_non_progress, Some(n) if n == 0) {
+            return None;
         }
+
+        if matches!(self.max_populations, Some(max) if max >= self.populations.len()) {
+            return None;
+        }
+
         let current = self.get_current_population();
         let next = current.advance();
 

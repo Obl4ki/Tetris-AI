@@ -5,11 +5,11 @@ use rand::{
 };
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Serialize, Deserialize, Hash, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, Hash, PartialEq, Eq)]
 pub struct Piece {
     pub block_type: PieceType,
     pub anchor_point: Coord<i32>,
-    pub block_positions: Vec<Coord<i32>>,
+    pub block_positions: [Coord<i32>; 4],
     pub rotation_idx: usize,
 }
 
@@ -28,25 +28,24 @@ impl Distribution<Piece> for Standard {
     }
 }
 
+#[must_use]
 /// Every block is represented as a Coordinate relative to the anchor point.
-pub fn get_blocks(block_type: PieceType) -> Vec<Coord<i32>> {
+pub const fn get_blocks(block_type: PieceType) -> [Coord<i32>; 4] {
+    let c = Coord::new;
     match block_type {
-        PieceType::I => vec![(0, -2), (0, -1), (0, 0), (0, 1)],
-        PieceType::O => vec![(0, 0), (0, 1), (1, 0), (1, 1)],
-        PieceType::T => vec![(0, 0), (-1, 0), (1, 0), (0, 1)],
-        PieceType::S => vec![(0, 0), (-1, 0), (0, 1), (1, 1)],
-        PieceType::Z => vec![(0, 0), (0, 1), (-1, 1), (1, 0)],
-        PieceType::J => vec![(0, 0), (-1, 0), (-1, 1), (1, 0)],
-        PieceType::L => vec![(0, 0), (-1, 0), (1, 0), (1, 1)],
+        PieceType::I => [c(0, -2), c(0, -1), c(0, 0), c(0, 1)],
+        PieceType::O => [c(0, 0), c(0, 1), c(1, 0), c(1, 1)],
+        PieceType::T => [c(0, 0), c(-1, 0), c(1, 0), c(0, 1)],
+        PieceType::S => [c(0, 0), c(-1, 0), c(0, 1), c(1, 1)],
+        PieceType::Z => [c(0, 0), c(0, 1), c(-1, 1), c(1, 0)],
+        PieceType::J => [c(0, 0), c(-1, 0), c(-1, 1), c(1, 0)],
+        PieceType::L => [c(0, 0), c(-1, 0), c(1, 0), c(1, 1)],
     }
-    .into_iter()
-    .map(Coord::from)
-    .collect()
 }
 
 impl Piece {
     #[must_use]
-    pub fn new(block_type: PieceType) -> Self {
+    pub const fn new(block_type: PieceType) -> Self {
         let anchor_point = Coord::new(4, 21);
 
         Self {

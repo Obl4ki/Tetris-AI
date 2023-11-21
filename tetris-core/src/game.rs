@@ -93,7 +93,7 @@ impl Game {
     }
 
     pub fn rotate(&mut self, rotation: Rotation) {
-        let original_piece = self.piece.clone();
+        let original_piece = self.piece;
 
         let old_rot_idx = self.piece.rotation_idx;
 
@@ -103,7 +103,7 @@ impl Game {
         for srs_case in get_offset_table(self.piece.block_type) {
             let offset = srs_case[new_rot_idx] - srs_case[old_rot_idx];
 
-            let mut kicked_piece = self.piece.clone();
+            let mut kicked_piece = self.piece;
             kicked_piece.anchor_point -= offset;
 
             if self.get_collision_after_move(Direction::None, &kicked_piece) == Collision::None {
