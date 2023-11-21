@@ -20,7 +20,7 @@ fn main() -> Result<()> {
 }
 
 fn run_model(args: CliArgs) -> Result<Entity> {
-    let mut ga = GA::new(&Config::from(args))?;
+    let mut ga = GA::new(&Config::try_from(args)?)?;
 
     ga.train(true);
 

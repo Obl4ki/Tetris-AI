@@ -9,11 +9,10 @@ unsafe_code = "forbid"
 pedantic = "warn"
 nursery = "warn"
 cast_possible_wrap = "allow"
-cast-possible-truncation = "allow"
 cast_sign_loss = "allow"
+cast-possible-truncation = "allow"
 cast_precision_loss = "allow"
 missing_panics_doc = "allow"
-struct_excessive_bools = "allow"
 module_name_repetitions = "allow"
 
 [profile.release]

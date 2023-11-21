@@ -1,3 +1,4 @@
+use anyhow::{Result, bail};
 use clap::Parser;
 use tetris_core::board::Board;
 use tetris_heuristics as heuristics;
@@ -5,6 +6,7 @@ use tetris_ml::Config;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
+#[allow(clippy::struct_excessive_bools)]
 pub struct CliArgs {
     #[arg(short, default_value_t = 100)]
     pub n_entities: usize,
@@ -48,36 +50,38 @@ pub struct CliArgs {
     pub clear_potential: bool,
 }
 
-impl From<CliArgs> for Config {
-    fn from(args: CliArgs) -> Self {
+impl TryFrom<CliArgs> for Config {
+    type Error = anyhow::Error;
+
+    fn try_from(args: CliArgs) -> Result<Self> {
         let mut heuristics_used: Vec<fn(&Board) -> f32> = vec![];
         if args.bumpyness {
-            heuristics_used.push(heuristics::bumpyness)
+            heuristics_used.push(heuristics::bumpyness);
         }
         if args.holes_present {
-            heuristics_used.push(heuristics::holes_present)
+            heuristics_used.push(heuristics::holes_present);
         }
         if args.highest_block {
-            heuristics_used.push(heuristics::highest_block)
+            heuristics_used.push(heuristics::highest_block);
         }
         if args.relative_diff {
-            heuristics_used.push(heuristics::relative_diff)
+            heuristics_used.push(heuristics::relative_diff);
         }
         if args.clear_potential {
-            heuristics_used.push(heuristics::clear_potential)
+            heuristics_used.push(heuristics::clear_potential);
         }
 
         if heuristics_used.is_empty() {
-            panic!("Pick at least one heuristic using the flag arguments.")
+            bail!("Pick at least one heuristic using the flag arguments.");
         }
 
-        Self {
+        Ok(Self {
             n_entities: args.n_entities,
             mutation_rate: args.mutation_rate,
             max_drops: args.max_drops,
             max_populations: args.max_populations,
             max_non_progress_populations: args.max_non_progress_populations,
             heuristics_used,
-        }
+        })
     }
 }
