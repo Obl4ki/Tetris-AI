@@ -24,7 +24,6 @@ impl GA {
     }
 
     #[must_use]
-    #[allow(clippy::missing_panics_doc)]
     pub fn get_current_population(&self) -> &Population {
         self.populations
             .last()

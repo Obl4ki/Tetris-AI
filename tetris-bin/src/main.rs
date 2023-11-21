@@ -1,15 +1,15 @@
-#![allow(unused)]
 pub mod args;
 
-use std::{thread::sleep, time::Duration};
+use std::thread::sleep;
+use std::time::Duration;
 
 use args::CliArgs;
+
 use tetris_core::prelude::*;
-use tetris_ml::{genetic_algorithm::GA, prelude::*};
+use tetris_ml::prelude::*;
 
 use anyhow::Result;
 use clap::Parser;
-use tetris_heuristics::prelude::*;
 
 fn main() -> Result<()> {
     let args = CliArgs::parse();

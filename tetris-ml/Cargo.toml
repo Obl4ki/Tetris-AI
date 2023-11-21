@@ -3,6 +3,9 @@ name = "tetris-ml"
 version = "0.1.0"
 edition = "2021"
 
+[lints]
+workspace = true
+
 [dependencies]
 tetris-core = { path = "../tetris-core" }
 tetris-heuristics = { path = "../tetris-heuristics" }
@@ -13,3 +16,4 @@ lazy_static = "1.4.0"
 clearscreen = "2.0.1"
 rayon = "1.8.0"
 indicatif = {version = "*", features = ["rayon"]}
+

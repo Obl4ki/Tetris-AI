@@ -3,7 +3,7 @@ use std::collections::{HashSet, VecDeque};
 use anyhow::{bail, Result};
 use rand::distributions::{Distribution, Uniform};
 use std::sync::Arc;
-use tetris_core::prelude::{Board, Game, Piece, Rotation};
+use tetris_core::prelude::*;
 use tetris_heuristics::prelude::*;
 
 #[derive(Debug, Clone)]
@@ -131,7 +131,6 @@ impl Entity {
     }
 }
 
-#[allow(clippy::cast_possible_truncation)]
 fn lower_piece_before_branching(game: &mut Game) {
     let lowest_piece_block = game.piece.iter_blocks().map(|pos| pos.y).min().unwrap();
     let highest_grid_block = highest_block(&game.board) as i32;

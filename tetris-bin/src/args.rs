@@ -1,4 +1,4 @@
-use clap::{ArgGroup, Parser};
+use clap::Parser;
 use tetris_core::board::Board;
 use tetris_heuristics as heuristics;
 use tetris_ml::Config;
@@ -40,6 +40,12 @@ pub struct CliArgs {
         help = "Indicates that the model should use highest block heuristic"
     )]
     pub highest_block: bool,
+
+    #[arg(
+        long,
+        help = "Indicates that the model should use clear potential heuristic"
+    )]
+    pub clear_potential: bool,
 }
 
 impl From<CliArgs> for Config {
@@ -56,6 +62,9 @@ impl From<CliArgs> for Config {
         }
         if args.relative_diff {
             heuristics_used.push(heuristics::relative_diff)
+        }
+        if args.clear_potential {
+            heuristics_used.push(heuristics::clear_potential)
         }
 
         if heuristics_used.is_empty() {

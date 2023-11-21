@@ -31,8 +31,6 @@ impl TryFrom<Coord<i32>> for Coord<usize> {
     }
 }
 
-#[allow(clippy::cast_possible_truncation)]
-#[allow(clippy::cast_possible_wrap)]
 impl From<Coord<usize>> for Coord<i32> {
     fn from(value: Coord<usize>) -> Self {
         Self::new(value.x as i32, value.y as i32)

@@ -4,6 +4,7 @@ use anyhow::Result;
 use rand::{
     distributions::WeightedIndex, prelude::Distribution, seq::SliceRandom, thread_rng, Rng,
 };
+
 use rayon::prelude::*;
 use tetris_core::prelude::*;
 
@@ -53,7 +54,6 @@ impl Population {
     }
 
     #[must_use]
-    #[allow(clippy::missing_panics_doc)]
     pub fn finish_all_games(self) -> Self {
         let completed_population = self
             .entities
@@ -85,14 +85,12 @@ impl Population {
     }
 
     #[must_use]
-    #[allow(clippy::cast_precision_loss)]
     pub const fn fitness(entity: &Entity) -> f64 {
         entity.game.score.score as f64
     }
 
     #[must_use]
     // Rulette selection
-    #[allow(clippy::missing_panics_doc)]
     pub fn selection(self) -> Self {
         let raw_probs: Vec<f64> = self.entities.iter().map(Self::fitness).collect();
 
@@ -125,7 +123,6 @@ impl Population {
     }
 
     #[must_use]
-    #[allow(clippy::missing_panics_doc)]
     pub fn crossover(self) -> Self {
         let offsprings = self
             .entities
@@ -200,7 +197,6 @@ impl Population {
     }
 
     #[must_use]
-    #[allow(clippy::missing_panics_doc)]
     pub fn get_best_entity(&self) -> &Entity {
         self.sorted_by_performance()
             .first()

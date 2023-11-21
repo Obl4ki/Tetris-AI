@@ -1,5 +1,5 @@
 use itertools::Itertools;
-use tetris_core::{entities::Coord, prelude::Board};
+use tetris_core::prelude::*;
 
 pub type HeuristicScore = f32;
 pub type Heuristic = fn(&Board) -> HeuristicScore;
@@ -69,18 +69,41 @@ pub fn relative_diff(state: &Board) -> HeuristicScore {
     max - min
 }
 
+#[must_use]
+pub fn clear_potential(state: &Board) -> HeuristicScore {
+    let mut game = Game::new();
+    game.board = *state;
+    game.piece = Piece::new(PieceType::I);
+    game.piece.anchor_point = Coord::new(0, game.piece.anchor_point.y);
+
+    let mut maximum_clears = 0;
+
+    for _ in 0..game.width {
+        let mut game_cpy = game.clone();
+        game_cpy.hard_drop();
+
+        maximum_clears = maximum_clears.max(game_cpy.score.cleared_rows - game.score.cleared_rows);
+        if maximum_clears == 4 {
+            break;
+        }
+
+        game.piece.anchor_point.x += 1;
+    }
+
+    maximum_clears as f32
+}
+
 #[cfg(test)]
 mod tests {
 
     use tetris_core::{entities::Coord, game_builder::GameBuilder};
 
-    use crate::{
-        heuristics::{bumpyness, relative_diff},
-        highest_block, holes_present,
-    };
     use tetris_core::entities::PieceType as PT;
 
-    use super::get_cols_max_heights;
+    use super::{
+        bumpyness, clear_potential, get_cols_max_heights, highest_block, holes_present,
+        relative_diff,
+    };
 
     #[test]
     fn test_get_cols_max_heights() {
@@ -161,5 +184,39 @@ mod tests {
 
         let res = holes_present(&game.board);
         assert!((res - 4.).abs() < f32::EPSILON);
+    }
+
+    #[test]
+    fn test_clear_potential_on_edges() {
+        // well on left
+        let mut gb = GameBuilder::new();
+        for x in 1..10 {
+            gb = gb.add_piece(PT::I, Coord::new(x, 0));
+        }
+        let game = gb.build();
+
+        let res = clear_potential(&game.board);
+        assert!(((res - 1.).abs() < f32::EPSILON));
+
+        // well on right
+        let mut gb = GameBuilder::new();
+        for x in 0..9 {
+            gb = gb.add_piece(PT::I, Coord::new(x, 0));
+        }
+        let game = gb.build();
+
+        let res = clear_potential(&game.board);
+        assert!(((res - 1.).abs() < f32::EPSILON));
+
+        // well on right height 2
+        let mut gb = GameBuilder::new();
+        for x in 0..9 {
+            gb = gb.add_piece(PT::I, Coord::new(x, 0));
+            gb = gb.add_piece(PT::I, Coord::new(x, 1));
+        }
+        let game = gb.build();
+
+        let res = clear_potential(&game.board);
+        assert!(((res - 2.).abs() < f32::EPSILON));
     }
 }
