@@ -128,20 +128,19 @@ impl Population {
             .entities
             .par_chunks(2)
             .flat_map(|entities| {
-                (0..2)
-                    .map(|_| {
-                        let split_idx = rand::thread_rng().gen_range(0..self.n_weights);
-                        let new_weights: Vec<f32> = entities[0]
-                            .weights
-                            .iter()
-                            .take(split_idx)
-                            .chain(entities[1].weights.iter().skip(split_idx))
-                            .copied()
-                            .collect();
+                let heuristics = &entities[0].heuristics;
+   
+                let w1 = entities[0].weights.iter();
+                let w2 = entities[1].weights.iter();
+                let entity1_w = w1.zip(w2).map(|(w1, w2)| 1.5 * w1 - 0.5 * w2).collect();
 
-                        Entity::from_weights(new_weights, &entities[0].heuristics).unwrap()
-                    })
-                    .collect::<Vec<Entity>>()
+                let w1 = entities[0].weights.iter();
+                let w2 = entities[1].weights.iter();
+                let entity2_w = w1.zip(w2).map(|(w1, w2)| -0.5 * w1 + 1.5 * w2).collect();
+                vec![
+                    Entity::from_weights(entity1_w, heuristics).unwrap(),
+                    Entity::from_weights(entity2_w, heuristics).unwrap(),
+                ]
             })
             .collect::<Vec<_>>();
 
@@ -165,7 +164,7 @@ impl Population {
             .map(|mut entity| {
                 if rng.gen_bool(self.mutation_rate) {
                     if let Some(random_weight) = entity.weights.choose_mut(&mut rng) {
-                        *random_weight = rng.gen_range(weights_sampling_interval.clone());
+                        *random_weight += rng.gen_range(weights_sampling_interval.clone());
                     }
                 }
                 entity
