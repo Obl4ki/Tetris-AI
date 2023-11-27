@@ -10,6 +10,9 @@ tetris-core = { path = "../tetris-core" }
 tetris-ml = { path = "../tetris-ml" }
 tetris-heuristics = { path = "../tetris-heuristics" }
 clap = { version = "4.4.8", features = ["derive"] }
+rayon = "1.8.0"
+indicatif = {version = "*", features = ["rayon"]}
+itertools = "0.12"
 
 [lints]
 workspace = true

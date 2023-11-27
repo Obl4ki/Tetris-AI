@@ -16,8 +16,8 @@ use rayon::iter::ParallelIterator;
 #[derive(Debug, Clone)]
 pub struct Population {
     pub entities: Vec<Entity>,
+    n_entities: usize,
     mutation_rate: f64,
-    n_weights: usize,
     max_drops: Option<usize>,
 }
 
@@ -36,10 +36,10 @@ impl Population {
             .collect();
 
         Ok(Self {
-            n_weights: entities[0].weights.len(),
             entities,
             mutation_rate: config.mutation_rate,
             max_drops: config.max_drops,
+            n_entities: config.n_entities,
         })
     }
 
@@ -48,9 +48,9 @@ impl Population {
         self.clone()
             .restart_games()
             .finish_all_games()
-            .selection()
             .crossover()
-            .mutation(0.0..10.0)
+            .selection()
+            .mutation(-1.0..1.0)
     }
 
     #[must_use]
@@ -58,15 +58,8 @@ impl Population {
         let completed_population = self
             .entities
             .into_par_iter()
-            .map(|mut entity| {
-                for _ in 0..self.max_drops.unwrap_or(usize::MAX) {
-                    if let Some(next_entity) = entity.next_best_state(Piece::random()) {
-                        entity = next_entity;
-                    } else {
-                        break;
-                    };
-                }
-                entity
+            .map(|entity| {
+                entity.play_for_n_turns_or_lose(self.max_drops)
             })
             .progress_with_style(
                 ProgressStyle::with_template(
@@ -78,9 +71,7 @@ impl Population {
 
         Self {
             entities: completed_population,
-            mutation_rate: self.mutation_rate,
-            n_weights: self.n_weights,
-            max_drops: self.max_drops,
+            ..self
         }
     }
 
@@ -110,15 +101,13 @@ impl Population {
 
         let new_population = dist
             .sample_iter(rng)
-            .take(self.entities.len() / 2)
+            .take(self.n_entities)
             .map(|idx| self.entities[idx].clone())
             .collect();
 
         Self {
             entities: new_population,
-            mutation_rate: self.mutation_rate,
-            n_weights: self.n_weights,
-            max_drops: self.max_drops,
+            ..self
         }
     }
 
@@ -129,7 +118,7 @@ impl Population {
             .par_chunks(2)
             .flat_map(|entities| {
                 let heuristics = &entities[0].heuristics;
-   
+
                 let w1 = entities[0].weights.iter();
                 let w2 = entities[1].weights.iter();
                 let entity1_w = w1.zip(w2).map(|(w1, w2)| 1.5 * w1 - 0.5 * w2).collect();
@@ -137,9 +126,15 @@ impl Population {
                 let w1 = entities[0].weights.iter();
                 let w2 = entities[1].weights.iter();
                 let entity2_w = w1.zip(w2).map(|(w1, w2)| -0.5 * w1 + 1.5 * w2).collect();
+
+                let w1 = entities[0].weights.iter();
+                let w2 = entities[1].weights.iter();
+                let entity3_w = w1.zip(w2).map(|(w1, w2)| 0.5 * w1 + 0.5 * w2).collect();
+
                 vec![
                     Entity::from_weights(entity1_w, heuristics).unwrap(),
                     Entity::from_weights(entity2_w, heuristics).unwrap(),
+                    Entity::from_weights(entity3_w, heuristics).unwrap(),
                 ]
             })
             .collect::<Vec<_>>();
@@ -148,9 +143,7 @@ impl Population {
 
         Self {
             entities: new_population,
-            mutation_rate: self.mutation_rate,
-            n_weights: self.n_weights,
-            max_drops: self.max_drops,
+            ..self
         }
     }
 
@@ -173,9 +166,7 @@ impl Population {
 
         Self {
             entities: new_population,
-            mutation_rate: self.mutation_rate,
-            n_weights: self.n_weights,
-            max_drops: self.max_drops,
+            ..self
         }
     }
 
@@ -200,5 +191,42 @@ impl Population {
         self.sorted_by_performance()
             .first()
             .expect("Population cannot be empty.")
+    }
+
+    #[must_use]
+    pub fn mean_fitness(&self) -> f64 {
+        self.entities.iter().map(Self::fitness).sum::<f64>() / self.entities.len() as f64
+    }
+
+    #[must_use]
+    pub fn lowest_fitness(&self) -> f64 {
+        let worst = self
+            .entities
+            .iter()
+            .min_by(|x, y| Self::fitness(x).total_cmp(&Self::fitness(y)))
+            .unwrap();
+        Self::fitness(worst)
+    }
+
+    #[must_use]
+    pub fn biggest_fitness(&self) -> f64 {
+        let best = self
+            .entities
+            .iter()
+            .max_by(|x, y| Self::fitness(x).total_cmp(&Self::fitness(y)))
+            .unwrap();
+        Self::fitness(best)
+    }
+
+    #[must_use]
+    pub fn median_fitness(&self) -> f64 {
+        let take_n = if self.entities.len() & 1 == 0 { 1 } else { 2 };
+        self.entities
+            .iter()
+            .skip(self.entities.len() / 2)
+            .take(take_n)
+            .map(Self::fitness)
+            .sum::<f64>()
+            / take_n as f64
     }
 }

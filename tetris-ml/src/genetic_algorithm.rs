@@ -30,24 +30,42 @@ impl GA {
             .expect("New constructs GA with at least 1 starting population, so last population will always exist.")
     }
 
-    pub fn train(&mut self, print_info: bool) {
-        if print_info {
-            println!("Starting generation: {}", self.populations.len() - 1);
-            println!("Best entity:");
+    pub fn train(&mut self) {
+        for pop_id in 0..self.max_populations.unwrap_or(usize::MAX) {
+            if matches!(self.max_non_progress, Some(n) if n == 0) {
+                break;
+            }
+
+            let current = self.get_current_population();
+            let next = current.advance();
+
+            let best_before = current.sorted_by_performance()[0];
+            let best_after = next.sorted_by_performance()[0];
+
+            if Population::fitness(best_before) >= Population::fitness(best_after) {
+                self.max_non_progress = self.max_non_progress.map(|x| x.saturating_sub(1));
+            }
+
+            let next_best = next.get_best_entity();
+            if Population::fitness(next_best) > Population::fitness(&self.best_entity) {
+                self.best_entity = next_best.clone();
+            }
+
+            self.populations.push(next);
+
+            let population = self.get_current_population();
+
+            println!("Generation {pop_id}:");
+            println!("Best entity so far:");
+            println!("Weights: {:?}", self.best_entity.weights);
+
+            println!("Mean fitness: {}", population.mean_fitness());
+            println!("Max fitness: {}", population.biggest_fitness());
+            println!("Worst fitness: {}", population.lowest_fitness());
+
             println!("Score: {:?}", self.best_entity.game.score);
             println!("Fitness: {:?}", Population::fitness(&self.best_entity));
-            println!("Weights: {:?}", self.best_entity.weights);
             println!("-----------------------------------------------------------");
-        }
-        while self.advance().is_some() {
-            if print_info {
-                println!("Generation {}:", self.populations.len() - 1);
-                println!("Best entity so far:");
-                println!("Score: {:?}", self.best_entity.game.score);
-                println!("Fitness: {:?}", Population::fitness(&self.best_entity));
-                println!("Weights: {:?}", self.best_entity.weights);
-                println!("-----------------------------------------------------------");
-            }
         }
     }
 
@@ -60,22 +78,6 @@ impl GA {
             return None;
         }
 
-        let current = self.get_current_population();
-        let next = current.advance();
-
-        let best_before = current.sorted_by_performance()[0];
-        let best_after = next.sorted_by_performance()[0];
-
-        if Population::fitness(best_before) >= Population::fitness(best_after) {
-            self.max_non_progress = self.max_non_progress.map(|x| x.saturating_sub(1));
-        }
-
-        let next_best = next.get_best_entity();
-        if Population::fitness(next_best) > Population::fitness(&self.best_entity) {
-            self.best_entity = next_best.clone();
-        }
-
-        self.populations.push(next);
         Some(self.get_current_population())
     }
 

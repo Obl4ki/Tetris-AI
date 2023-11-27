@@ -17,7 +17,7 @@ impl Entity {
     #[must_use]
     pub fn new(heuristics: Arc<Vec<Heuristic>>) -> Self {
         let rng = rand::thread_rng();
-        let dist = Uniform::from(0.0..10.0);
+        let dist = Uniform::from(-1.0..1.0);
         let n_weights = heuristics.len();
         Self {
             game: Game::new(),
@@ -43,6 +43,24 @@ impl Entity {
             weights,
             heuristics: Arc::new(heuristics.to_vec()),
         })
+    }
+
+    #[must_use]
+    pub fn play_for_n_turns_or_lose(self, n_turns: Option<usize>) -> Self {
+        let mut entity = self;
+        for _ in 0..n_turns.unwrap_or(usize::MAX) {
+            if let Some(next_entity) = entity.next_best_state(Piece::random()) {
+                entity = next_entity;
+            } else {
+                break;
+            };
+        }
+        entity
+    }
+
+    #[must_use]
+    pub fn play_until_lost(self) -> Self {
+        self.play_for_n_turns_or_lose(None)
     }
 
     #[must_use]
