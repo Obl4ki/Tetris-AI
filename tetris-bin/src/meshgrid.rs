@@ -30,22 +30,28 @@ pub struct FitnessAtPoint {
     pub fitness: f64,
 }
 
-
-pub fn generate_grid(from: f32, to: f32, n_samples: usize, x_heuristic: Heuristic, y_heuristic: Heuristic) -> Result<Vec<FitnessAtPoint>> {
+pub fn generate_grid(
+    from: f32,
+    to: f32,
+    n_samples: usize,
+    x_heuristic: Heuristic,
+    y_heuristic: Heuristic,
+) -> Result<Vec<FitnessAtPoint>> {
     let mut locations: Vec<(f32, f32)> = Vec::with_capacity(n_samples.pow(2));
 
-    for (x, y) in linspace(from, to, n_samples).into_iter().cartesian_product(linspace(from, to, n_samples).into_iter()){
-            locations.push((x, y));
+    for (x, y) in linspace(from, to, n_samples)
+        .into_iter()
+        .cartesian_product(linspace(from, to, n_samples).into_iter())
+    {
+        locations.push((x, y));
     }
 
     locations
         .into_par_iter()
         .map(|(x, y)| {
-            
             let mut entity =
             Entity::from_weights(vec![x, y], &[x_heuristic, y_heuristic])?;
             let mut mean_fitness = 0.0;
-            
             for _ in 0..N_TRIES {
                 entity.game = Game::new();
                 entity = entity.play_until_lost();

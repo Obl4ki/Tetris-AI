@@ -19,6 +19,7 @@ pub struct Population {
     n_entities: usize,
     mutation_rate: f64,
     max_drops: Option<usize>,
+    evaluator: fn(&Self),
 }
 
 impl Population {
@@ -26,7 +27,7 @@ impl Population {
     ///
     /// This function will return an error if validation of [`Config`] fails.
     /// See [`Config::validate`] for more details.
-    pub fn new(config: &Config) -> Result<Self> {
+    pub fn new(config: &Config, evaluator: fn(&Self)) -> Result<Self> {
         config.validate()?;
 
         let heuristics_ref = Arc::new(config.heuristics_used.clone());
@@ -40,6 +41,7 @@ impl Population {
             mutation_rate: config.mutation_rate,
             max_drops: config.max_drops,
             n_entities: config.n_entities,
+            evaluator,
         })
     }
 
@@ -48,8 +50,8 @@ impl Population {
         self.clone()
             .restart_games()
             .finish_all_games()
-            .crossover()
             .selection()
+            .crossover()
             .mutation(-1.0..1.0)
     }
 
@@ -58,9 +60,7 @@ impl Population {
         let completed_population = self
             .entities
             .into_par_iter()
-            .map(|entity| {
-                entity.play_for_n_turns_or_lose(self.max_drops)
-            })
+            .map(|entity| entity.play_for_n_turns_or_lose(self.max_drops))
             .progress_with_style(
                 ProgressStyle::with_template(
                     "[{elapsed_precise}] {bar:40.cyan/blue} {pos:>7}/{len:7} {msg}",
@@ -69,10 +69,14 @@ impl Population {
             )
             .collect::<Vec<Entity>>();
 
-        Self {
+        let finalized_population = Self {
             entities: completed_population,
             ..self
-        }
+        };
+        
+        (self.evaluator)(&finalized_population);
+
+        finalized_population
     }
 
     #[must_use]
@@ -113,36 +117,47 @@ impl Population {
 
     #[must_use]
     pub fn crossover(self) -> Self {
+        let cross_method = |w1: f32, w2: f32| -> f32 {
+            let alpha: f32 = rand::thread_rng().gen_range(0.0..1.0);
+
+            alpha.mul_add(w1, (1.0 - alpha) * w2)
+        };
+
         let offsprings = self
             .entities
-            .par_chunks(2)
+            .into_par_iter()
+            .chunks(2)
             .flat_map(|entities| {
-                let heuristics = &entities[0].heuristics;
-
-                let w1 = entities[0].weights.iter();
-                let w2 = entities[1].weights.iter();
-                let entity1_w = w1.zip(w2).map(|(w1, w2)| 1.5 * w1 - 0.5 * w2).collect();
-
-                let w1 = entities[0].weights.iter();
-                let w2 = entities[1].weights.iter();
-                let entity2_w = w1.zip(w2).map(|(w1, w2)| -0.5 * w1 + 1.5 * w2).collect();
-
-                let w1 = entities[0].weights.iter();
-                let w2 = entities[1].weights.iter();
-                let entity3_w = w1.zip(w2).map(|(w1, w2)| 0.5 * w1 + 0.5 * w2).collect();
+                let first = &entities[0];
+                let second = &entities[1];
 
                 vec![
-                    Entity::from_weights(entity1_w, heuristics).unwrap(),
-                    Entity::from_weights(entity2_w, heuristics).unwrap(),
-                    Entity::from_weights(entity3_w, heuristics).unwrap(),
+                    Entity::from_weights(
+                        first
+                            .weights
+                            .iter()
+                            .zip(second.weights.iter())
+                            .map(|(&first_w, &second_w)| cross_method(first_w, second_w))
+                            .collect(),
+                        &first.heuristics,
+                    )
+                    .unwrap(),
+                    Entity::from_weights(
+                        first
+                            .weights
+                            .iter()
+                            .zip(second.weights.iter())
+                            .map(|(&first_w, &second_w)| cross_method(second_w, first_w))
+                            .collect(),
+                        &second.heuristics,
+                    )
+                    .unwrap(),
                 ]
             })
-            .collect::<Vec<_>>();
-
-        let new_population = self.entities.into_iter().chain(offsprings).collect();
+            .collect::<Vec<Entity>>();
 
         Self {
-            entities: new_population,
+            entities: offsprings,
             ..self
         }
     }

@@ -13,8 +13,8 @@ impl GA {
     /// # Errors
     ///
     /// This function will return an error if [`Config::validate`] fails.
-    pub fn new(config: &Config) -> Result<Self> {
-        let start_population = Population::new(config)?;
+    pub fn new(config: &Config, evaluator: fn(&Population)) -> Result<Self> {
+        let start_population = Population::new(config, evaluator)?;
         Ok(Self {
             max_populations: config.max_populations,
             max_non_progress: config.max_non_progress_populations,
@@ -52,20 +52,6 @@ impl GA {
             }
 
             self.populations.push(next);
-
-            let population = self.get_current_population();
-
-            println!("Generation {pop_id}:");
-            println!("Best entity so far:");
-            println!("Weights: {:?}", self.best_entity.weights);
-
-            println!("Mean fitness: {}", population.mean_fitness());
-            println!("Max fitness: {}", population.biggest_fitness());
-            println!("Worst fitness: {}", population.lowest_fitness());
-
-            println!("Score: {:?}", self.best_entity.game.score);
-            println!("Fitness: {:?}", Population::fitness(&self.best_entity));
-            println!("-----------------------------------------------------------");
         }
     }
 

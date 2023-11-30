@@ -1,4 +1,4 @@
-use anyhow::{Result, bail};
+use anyhow::{bail, Result};
 use clap::Parser;
 use tetris_core::board::Board;
 use tetris_heuristics as heuristics;

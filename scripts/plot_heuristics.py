@@ -20,7 +20,7 @@ def save_pcolormesh_to_jpg(data: np.ndarray, output_file: str, x_label: str, y_l
     plt.ylabel(y_label)
     plt.title('Wpływ 2 heurystyk na fitness score')
     plt.gca().set_aspect('equal')
-    plt.savefig(output_file, format='jpg')  # Save the plot as a JPEG file
+    plt.savefig(output_file, format='jpg', dpi=600)  # Save the plot as a JPEG file
     plt.close()  # Close the plot to free up memory (optional)
 
 if __name__ == '__main__':
