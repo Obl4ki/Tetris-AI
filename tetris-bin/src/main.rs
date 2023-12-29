@@ -2,19 +2,12 @@ pub mod args;
 pub mod meshgrid;
 pub mod persistance;
 
-use std::fs::File;
-use std::io::Write;
-use std::path::Path;
-use std::process::Command;
 use std::thread::sleep;
 use std::time::Duration;
 
 use args::CliArgs;
 
-use clearscreen::clear;
-use meshgrid::FitnessAtPoint;
 use tetris_core::prelude::*;
-use tetris_heuristics::{bumpyness, clear_potential};
 use tetris_ml::prelude::*;
 
 use anyhow::Result;
@@ -23,16 +16,6 @@ use clap::Parser;
 fn main() -> Result<()> {
     let args = CliArgs::parse();
 
-    // let data = meshgrid::generate_grid(-1.0, 1.0, 20, bumpyness, clear_potential)?;
-    // write_points_to_file(
-    //     "data/output.csv",
-    //     &data,
-    //     "Bumpyness",
-    //     "Clear potential",
-    //     "Fitness",
-    // )?;
-
-    // show_graph()?;
     let best_entity = run_model(args)?;
 
     // play_game_with_entity(best_entity)?;
@@ -40,7 +23,7 @@ fn main() -> Result<()> {
 }
 
 fn run_model(args: CliArgs) -> Result<Entity> {
-    let mut ga = GA::new(&Config::try_from(args)?, |population| {
+    let mut ga = GA::new(&mut Config::try_from(args)?, |population| {
         let best_entity = population.get_best_entity();
         println!("Best entity so far:");
         println!("Weights: {:?}", best_entity.weights);
@@ -76,7 +59,6 @@ fn play_game_with_entity(mut entity: Entity) -> Result<()> {
     Ok(())
 }
 
-#[allow(unused)]
 fn run_with_weights(weights: Vec<f32>) -> Result<()> {
     let mut current_entity = Entity::from_weights(weights, &[])?;
 

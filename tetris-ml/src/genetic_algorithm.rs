@@ -13,7 +13,7 @@ impl GA {
     /// # Errors
     ///
     /// This function will return an error if [`Config::validate`] fails.
-    pub fn new(config: &Config, evaluator: fn(&Population)) -> Result<Self> {
+    pub fn new(config: &mut Config, evaluator: fn(&Population)) -> Result<Self> {
         let start_population = Population::new(config, evaluator)?;
         Ok(Self {
             max_populations: config.max_populations,
@@ -31,7 +31,7 @@ impl GA {
     }
 
     pub fn train(&mut self) {
-        for pop_id in 0..self.max_populations.unwrap_or(usize::MAX) {
+        for _ in 0..self.max_populations.unwrap_or(usize::MAX) {
             if matches!(self.max_non_progress, Some(n) if n == 0) {
                 break;
             }

@@ -93,6 +93,23 @@ pub fn clear_potential(state: &Board) -> HeuristicScore {
     maximum_clears as f32
 }
 
+#[must_use]
+pub fn distance_mean_from_4(state: &Board) -> HeuristicScore {
+    let heights = get_cols_max_heights(state);
+
+    let most_common_height = heights
+        .into_iter()
+        .counts()
+        .drain()
+        .max_by_key(|(_, count)| *count);
+
+    match most_common_height {
+        Some((height, _)) if height >= 4 => 2usize.pow((height - 4) as u32) as HeuristicScore,
+        Some((height, _)) => (4 - height) as HeuristicScore,
+        None => 0.,
+    }
+}
+
 #[cfg(test)]
 mod tests {
 

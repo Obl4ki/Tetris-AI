@@ -27,10 +27,10 @@ impl Population {
     ///
     /// This function will return an error if validation of [`Config`] fails.
     /// See [`Config::validate`] for more details.
-    pub fn new(config: &Config, evaluator: fn(&Self)) -> Result<Self> {
+    pub fn new(config: &mut Config, evaluator: fn(&Self)) -> Result<Self> {
         config.validate()?;
 
-        let heuristics_ref = Arc::new(config.heuristics_used.clone());
+        let heuristics_ref = Arc::new(std::mem::take(&mut config.heuristics_used));
 
         let entities: Vec<Entity> = (0..config.n_entities)
             .map(|_| Entity::new(Arc::clone(&heuristics_ref)))
@@ -73,7 +73,7 @@ impl Population {
             entities: completed_population,
             ..self
         };
-        
+
         (self.evaluator)(&finalized_population);
 
         finalized_population
