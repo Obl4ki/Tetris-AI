@@ -80,8 +80,8 @@ impl Population {
     }
 
     #[must_use]
-    pub const fn fitness(entity: &Entity) -> f64 {
-        entity.game.score.score as f64
+    pub fn fitness(entity: &Entity) -> f64 {
+        entity.game.score.score.pow(2) as f64 / entity.game.score.dropped_pieces as f64
     }
 
     #[must_use]

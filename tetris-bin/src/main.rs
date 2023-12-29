@@ -8,6 +8,7 @@ use std::time::Duration;
 use args::CliArgs;
 
 use tetris_core::prelude::*;
+use tetris_core::scoring::Score;
 use tetris_ml::prelude::*;
 
 use anyhow::Result;
@@ -26,14 +27,28 @@ fn run_model(args: CliArgs) -> Result<Entity> {
     let mut ga = GA::new(&mut Config::try_from(args)?, |population| {
         let best_entity = population.get_best_entity();
         println!("Best entity so far:");
-        println!("Weights: {:?}", best_entity.weights);
+        println!("Weights:\t{:?}", best_entity.weights);
 
-        println!("Mean fitness: {}", population.mean_fitness());
-        println!("Max fitness: {}", population.biggest_fitness());
-        println!("Worst fitness: {}", population.lowest_fitness());
+        println!("Max fitness:\t{:.2}", population.biggest_fitness());
+        println!("Worst fitness:\t{:.2}", population.lowest_fitness());
 
-        println!("Score: {:?}", best_entity.game.score);
-        println!("Fitness: {:?}", Population::fitness(best_entity));
+        println!("Mean fitness:\t{:.2}", population.mean_fitness());
+        println!("Median fitness:\t{:.2}", population.median_fitness());
+
+        let Score {
+            cleared_rows,
+            score,
+            dropped_pieces,
+        } = best_entity.game.score;
+        println!("/-------------------------------------------\\");
+        println!("| Cleared rows |   Score   | Dropped pieces |");
+        println!("|-------------------------------------------|");
+        println!(
+            "|{:^14.2}|{:^11.2}|{:^16.2}|",
+            cleared_rows, score, dropped_pieces
+        );
+        println!("\\-------------------------------------------/");
+
         println!("-----------------------------------------------------------");
     })?;
 
