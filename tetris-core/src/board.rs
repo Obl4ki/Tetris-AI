@@ -1,7 +1,6 @@
 use std::fmt::Display;
 
 use itertools::Itertools;
-use serde::{Deserialize, Serialize};
 
 use crate::entities::{Coord, PieceType};
 use colored::customcolors::CustomColor;
@@ -10,7 +9,7 @@ use colored::Colorize;
 const W: usize = 10;
 const H: usize = 24;
 
-#[derive(Clone, Copy, Debug, Serialize, Deserialize, Hash, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, Hash, PartialEq, Eq)]
 pub struct Board {
     grid: [[Option<PieceType>; H]; W],
 }

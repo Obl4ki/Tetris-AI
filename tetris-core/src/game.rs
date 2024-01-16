@@ -1,5 +1,3 @@
-use serde::{Deserialize, Serialize};
-
 use crate::board::Board;
 use crate::entities::{Collision, Coord, Direction, Rotation};
 use crate::piece::Piece;
@@ -7,7 +5,7 @@ use crate::scoring::Score;
 use crate::srs::get_offset_table;
 
 /// Main game struct, used to instantiate the game.
-#[derive(Debug, Clone, Serialize, Deserialize, Hash, PartialEq, Eq)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub struct Game {
     pub board: Board,
     pub piece: Piece,
@@ -103,18 +101,23 @@ impl Game {
         self.piece.rotate(rotation);
 
         let new_rot_idx = self.piece.rotation_idx;
+        // dla każdego z 5 przesunięć
         for srs_case in get_offset_table(self.piece.block_type) {
+            // oblicznie alternatywnej pozycji z tablicy
             let offset = srs_case[new_rot_idx] - srs_case[old_rot_idx];
 
             let mut kicked_piece = self.piece;
+            // próba przesunięcia skopiowanego tetrimina
             kicked_piece.anchor_point -= offset;
 
+            // jeżeli tetrimino nie koliduje z żadnymi blokami, to znaleziono alternatywną pozycję
             if self.get_collision_after_move(Direction::None, &kicked_piece) == Collision::None {
                 self.piece = kicked_piece;
                 return;
             }
         }
 
+        // wszystkie 5 pozycji nie przeszły testu na kolidowanie z klockami na planszy, więc nie obracamy
         self.piece = original_piece;
     }
 
