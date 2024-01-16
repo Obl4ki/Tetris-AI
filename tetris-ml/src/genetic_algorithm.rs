@@ -1,11 +1,11 @@
-use crate::{population::Population, Config, Entity};
+use crate::{population::Population, Agent, Config};
 use anyhow::Result;
+use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 
 pub struct GA {
     pub populations: Vec<Population>,
     pub max_populations: Option<usize>,
     pub max_non_progress: Option<usize>,
-    best_entity: Entity,
 }
 
 impl GA {
@@ -13,12 +13,11 @@ impl GA {
     /// # Errors
     ///
     /// This function will return an error if [`Config::validate`] fails.
-    pub fn new(config: &mut Config, evaluator: fn(&Population)) -> Result<Self> {
-        let start_population = Population::new(config, evaluator)?;
+    pub fn new(config: &mut Config, population_evaluator: fn(&Population)) -> Result<Self> {
+        let start_population = Population::new(config, population_evaluator)?;
         Ok(Self {
             max_populations: config.max_populations,
             max_non_progress: config.max_non_progress_populations,
-            best_entity: start_population.get_best_entity().clone(),
             populations: vec![start_population],
         })
     }
@@ -39,16 +38,11 @@ impl GA {
             let current = self.get_current_population();
             let next = current.advance();
 
-            let best_before = current.sorted_by_performance()[0];
-            let best_after = next.sorted_by_performance()[0];
+            let best_before = current.get_best_entity();
+            let best_after = next.get_best_entity();
 
             if Population::fitness(best_before) >= Population::fitness(best_after) {
                 self.max_non_progress = self.max_non_progress.map(|x| x.saturating_sub(1));
-            }
-
-            let next_best = next.get_best_entity();
-            if Population::fitness(next_best) > Population::fitness(&self.best_entity) {
-                self.best_entity = next_best.clone();
             }
 
             self.populations.push(next);
@@ -68,7 +62,21 @@ impl GA {
     }
 
     #[must_use]
-    pub fn get_best_entity(&self) -> Entity {
-        self.best_entity.clone()
+    pub fn get_best_entity(&self) -> Agent {
+        let population_with_best_agent = self
+            .populations
+            .par_iter()
+            .max_by(|p1, p2| {
+                Population::fitness(p1.get_best_entity())
+                    .total_cmp(&Population::fitness(p2.get_best_entity()))
+            })
+            .unwrap();
+
+        population_with_best_agent
+            .entities
+            .par_iter()
+            .max_by(|x, y| Population::fitness(x).total_cmp(&Population::fitness(y)))
+            .unwrap()
+            .clone()
     }
 }

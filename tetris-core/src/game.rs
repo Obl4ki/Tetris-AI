@@ -11,6 +11,7 @@ use crate::srs::get_offset_table;
 pub struct Game {
     pub board: Board,
     pub piece: Piece,
+    pub next_piece: Piece,
     pub width: i32,
     pub height: i32,
     pub score: Score,
@@ -22,6 +23,7 @@ impl Game {
         Self {
             board: Board::new(),
             piece: rand::random(),
+            next_piece: rand::random(),
             width: 10,
             height: 20,
             score: Score::default(),
@@ -29,7 +31,8 @@ impl Game {
     }
 
     pub fn reload_piece(&mut self) {
-        self.piece = rand::random();
+        self.piece = self.next_piece;
+        self.next_piece = rand::random();
     }
 
     /// Check if after the move in the specified direction there will

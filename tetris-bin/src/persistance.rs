@@ -5,6 +5,7 @@ use anyhow::Result;
 
 use crate::meshgrid::FitnessAtPoint;
 
+#[allow(unused)]
 fn write_points_to_file(
     filename: impl AsRef<Path>,
     data_points: &[FitnessAtPoint],

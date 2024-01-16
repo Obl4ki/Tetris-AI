@@ -1,19 +1,21 @@
-use std::collections::{HashSet, VecDeque};
-
 use anyhow::{bail, Result};
 use rand::distributions::{Distribution, Uniform};
+use std::collections::{HashSet, VecDeque};
 use std::sync::Arc;
+
 use tetris_core::prelude::*;
 use tetris_heuristics::prelude::*;
 
+use crate::BranchingMode;
+
 #[derive(Debug, Clone)]
-pub struct Entity {
+pub struct Agent {
     pub game: Game,
     pub weights: Vec<f32>,
     pub heuristics: Arc<Vec<Heuristic>>,
 }
 
-impl Entity {
+impl Agent {
     #[must_use]
     pub fn new(heuristics: Arc<Vec<Heuristic>>) -> Self {
         let rng = rand::thread_rng();
@@ -46,11 +48,18 @@ impl Entity {
     }
 
     #[must_use]
-    pub fn play_for_n_turns_or_lose(self, n_turns: Option<usize>) -> Self {
+    pub fn play_for_n_turns_or_lose(
+        self,
+        n_turns: Option<usize>,
+        branching_mode: BranchingMode,
+    ) -> Self {
         let mut entity = self;
         for _ in 0..n_turns.unwrap_or(usize::MAX) {
-            if let Some(next_entity) = entity.next_best_state(Piece::random()) {
-                entity = next_entity;
+            if let Some(next_entity) = entity.next_best_state(branching_mode) {
+                entity = Self {
+                    game: next_entity,
+                    ..entity
+                };
             } else {
                 break;
             };
@@ -59,26 +68,36 @@ impl Entity {
     }
 
     #[must_use]
-    pub fn play_until_lost(self) -> Self {
-        self.play_for_n_turns_or_lose(None)
+    pub fn play_until_lost(self, branching_mode: BranchingMode) -> Self {
+        self.play_for_n_turns_or_lose(None, branching_mode)
     }
 
     #[must_use]
-    pub fn next_best_state(&self, piece: Piece) -> Option<Self> {
-        self.get_all_possible_next_game_states()
+    pub fn next_best_state(&self, branching_mode: BranchingMode) -> Option<Game> {
+        // Inner vectors are paths with first and possibly the second state
+        let states = Self::get_all_possible_next_game_states(self.game.clone())
+            .into_iter()
+            .map(|game| vec![game]);
+
+        let states: Vec<Vec<Game>> = if let BranchingMode::CurrentAndNext = branching_mode {
+            states
+                .flat_map(|path| {
+                    Self::get_all_possible_next_game_states(path[0].clone())
+                        .into_iter()
+                        .map(move |next| vec![path[0].clone(), next])
+                })
+                .collect()
+        } else {
+            states.collect()
+        };
+
+        states
             .into_iter()
             .min_by(|a, b| {
-                self.forward_with_board(&a.board)
-                    .total_cmp(&self.forward_with_board(&b.board))
+                self.forward_with_board(&a.last().unwrap().board)
+                    .total_cmp(&self.forward_with_board(&b.last().unwrap().board))
             })
-            .map(|mut best_game| {
-                best_game.piece = piece;
-                Self {
-                    game: best_game,
-                    weights: self.weights.clone(),
-                    heuristics: self.heuristics.clone(),
-                }
-            })
+            .map(|minimal_path| minimal_path.first().cloned().unwrap())
     }
 
     const ACTIONS: [fn(&mut Game); 6] = [
@@ -96,9 +115,7 @@ impl Entity {
     ///
     /// Use hashset to delete pieces that were previously branched out to avoid repetition.
     #[must_use]
-    pub fn get_all_possible_next_game_states(&self) -> Vec<Game> {
-        let mut game = self.game.clone();
-
+    pub fn get_all_possible_next_game_states(mut game: Game) -> Vec<Game> {
         let n_dropped_pieces = game.score.dropped_pieces;
 
         lower_piece_before_branching(&mut game);

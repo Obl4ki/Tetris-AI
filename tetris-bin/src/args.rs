@@ -1,5 +1,6 @@
 use anyhow::{bail, Result};
 use clap::Parser;
+use heuristics::{Heuristic, HeuristicScore};
 use tetris_core::board::Board;
 use tetris_heuristics as heuristics;
 use tetris_ml::Config;
@@ -27,7 +28,7 @@ impl TryFrom<CliArgs> for Config {
     type Error = anyhow::Error;
 
     fn try_from(args: CliArgs) -> Result<Self> {
-        let heuristics_used: Vec<fn(&Board) -> f32> = vec![
+        let heuristics_used: Vec<Heuristic> = vec![
             heuristics::bumpyness,
             heuristics::holes_present,
             heuristics::relative_diff,

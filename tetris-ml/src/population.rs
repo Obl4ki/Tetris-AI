@@ -8,14 +8,14 @@ use rand::{
 use rayon::prelude::*;
 use tetris_core::prelude::*;
 
-use crate::entity::Entity;
 use crate::model_config::Config;
+use crate::{agent::Agent, BranchingMode};
 use indicatif::{ParallelProgressIterator, ProgressStyle};
 use rayon::iter::ParallelIterator;
 
 #[derive(Debug, Clone)]
 pub struct Population {
-    pub entities: Vec<Entity>,
+    pub entities: Vec<Agent>,
     n_entities: usize,
     mutation_rate: f64,
     max_drops: Option<usize>,
@@ -32,8 +32,8 @@ impl Population {
 
         let heuristics_ref = Arc::new(std::mem::take(&mut config.heuristics_used));
 
-        let entities: Vec<Entity> = (0..config.n_entities)
-            .map(|_| Entity::new(Arc::clone(&heuristics_ref)))
+        let entities: Vec<Agent> = (0..config.n_entities)
+            .map(|_| Agent::new(Arc::clone(&heuristics_ref)))
             .collect();
 
         Ok(Self {
@@ -60,14 +60,14 @@ impl Population {
         let completed_population = self
             .entities
             .into_par_iter()
-            .map(|entity| entity.play_for_n_turns_or_lose(self.max_drops))
+            .map(|entity| entity.play_for_n_turns_or_lose(self.max_drops, BranchingMode::CurrentAndNext))
             .progress_with_style(
                 ProgressStyle::with_template(
                     "[{elapsed_precise}] {bar:40.cyan/blue} {pos:>7}/{len:7} {msg}",
                 )
                 .unwrap(),
             )
-            .collect::<Vec<Entity>>();
+            .collect::<Vec<Agent>>();
 
         let finalized_population = Self {
             entities: completed_population,
@@ -80,8 +80,8 @@ impl Population {
     }
 
     #[must_use]
-    pub fn fitness(entity: &Entity) -> f64 {
-        entity.game.score.score.pow(2) as f64 / entity.game.score.dropped_pieces as f64
+    pub fn fitness(entity: &Agent) -> f64 {
+        entity.game.score.score as f64
     }
 
     #[must_use]
@@ -132,7 +132,7 @@ impl Population {
                 let second = &entities[1];
 
                 vec![
-                    Entity::from_weights(
+                    Agent::from_weights(
                         first
                             .weights
                             .iter()
@@ -142,7 +142,7 @@ impl Population {
                         &first.heuristics,
                     )
                     .unwrap(),
-                    Entity::from_weights(
+                    Agent::from_weights(
                         first
                             .weights
                             .iter()
@@ -154,7 +154,7 @@ impl Population {
                     .unwrap(),
                 ]
             })
-            .collect::<Vec<Entity>>();
+            .collect::<Vec<Agent>>();
 
         Self {
             entities: offsprings,
@@ -189,12 +189,12 @@ impl Population {
     pub fn restart_games(mut self) -> Self {
         self.entities
             .par_iter_mut()
-            .for_each(|x: &mut Entity| x.game = Game::new());
+            .for_each(|x: &mut Agent| x.game = Game::new());
         self
     }
 
     #[must_use]
-    pub fn sorted_by_performance(&self) -> Vec<&Entity> {
+    pub fn sorted_by_performance(&self) -> Vec<&Agent> {
         let mut entity_refs = self.entities.iter().collect::<Vec<_>>();
 
         entity_refs.sort_unstable_by(|x, y| Self::fitness(y).total_cmp(&Self::fitness(x)));
@@ -202,7 +202,7 @@ impl Population {
     }
 
     #[must_use]
-    pub fn get_best_entity(&self) -> &Entity {
+    pub fn get_best_entity(&self) -> &Agent {
         self.sorted_by_performance()
             .first()
             .expect("Population cannot be empty.")
