@@ -3,6 +3,14 @@ name = "tetris-bin"
 version = "0.1.0"
 edition = "2021"
 
+[[bin]]
+name = "train"
+path = "src/train.rs"
+
+[[bin]]
+name = "play"
+path = "src/play.rs"
+
 [dependencies]
 anyhow = "1.0.75"
 clearscreen = "2.0.1"
@@ -13,6 +21,7 @@ clap = { version = "4.4.8", features = ["derive"] }
 rayon = "1.8.0"
 indicatif = {version = "*", features = ["rayon"]}
 itertools = "0.12"
+macroquad = "0.4.4"
 
 [lints]
 workspace = true

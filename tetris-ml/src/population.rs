@@ -60,7 +60,7 @@ impl Population {
         let completed_population = self
             .entities
             .into_par_iter()
-            .map(|entity| entity.play_for_n_turns_or_lose(self.max_drops, BranchingMode::CurrentAndNext))
+            .map(|entity| entity.play_for_n_turns_or_lose(self.max_drops, BranchingMode::default()))
             .progress_with_style(
                 ProgressStyle::with_template(
                     "[{elapsed_precise}] {bar:40.cyan/blue} {pos:>7}/{len:7} {msg}",
@@ -80,7 +80,7 @@ impl Population {
     }
 
     #[must_use]
-    pub fn fitness(entity: &Agent) -> f64 {
+    pub const fn fitness(entity: &Agent) -> f64 {
         entity.game.score.score as f64
     }
 

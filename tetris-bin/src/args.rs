@@ -5,6 +5,8 @@ use tetris_core::board::Board;
 use tetris_heuristics as heuristics;
 use tetris_ml::Config;
 
+use crate::used_heuristics::get_heuristics;
+
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 #[allow(clippy::struct_excessive_bools)]
@@ -28,14 +30,7 @@ impl TryFrom<CliArgs> for Config {
     type Error = anyhow::Error;
 
     fn try_from(args: CliArgs) -> Result<Self> {
-        let heuristics_used: Vec<Heuristic> = vec![
-            heuristics::bumpyness,
-            heuristics::holes_present,
-            heuristics::relative_diff,
-            heuristics::highest_block,
-            heuristics::clear_potential,
-            heuristics::distance_mean_from_4,
-        ];
+        let heuristics_used = get_heuristics();
 
         Ok(Self {
             n_entities: args.n_entities,
