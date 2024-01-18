@@ -4,3 +4,12 @@ pub enum BranchingMode {
     Current,
     CurrentAndNext,
 }
+
+impl BranchingMode {
+    pub fn toggle(&mut self) {
+        *self = match self {
+            Self::Current => Self::CurrentAndNext,
+            Self::CurrentAndNext => Self::Current,
+        }
+    }
+}

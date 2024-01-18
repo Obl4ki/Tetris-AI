@@ -7,6 +7,7 @@ fn window_conf() -> Conf {
         window_width: 1200,
         window_height: 800,
         window_resizable: false,
+        sample_count: 2,
         ..Conf::default()
     }
 }

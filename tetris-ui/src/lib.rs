@@ -9,6 +9,8 @@ const GRID_SPACING: f32 = 2.;
 const BOARD_MARGIN: f32 = 5.;
 
 pub async fn run() -> Result<()> {
+    let mut branching_mode = BranchingMode::Current;
+
     let mut agent = Agent::from_weights(
         vec![
             0.153_936_06,
@@ -27,9 +29,13 @@ pub async fn run() -> Result<()> {
         clear_background(BLACK);
         draw_background(game_width, game_height);
         draw_current_state(&agent);
+        show_branching_mode_text(branching_mode);
 
-        agent.make_a_move(BranchingMode::Current);
+        if is_key_pressed(KeyCode::Space) {
+            branching_mode.toggle();
+        }
 
+        agent.make_a_move(branching_mode);
         next_frame().await;
     }
 }
@@ -100,6 +106,15 @@ fn draw_background(width: i32, height: i32) {
             draw_tetrimino(x as f32, y as f32, Color::from_rgba(127, 127, 127, 255));
         }
     }
+}
+
+fn show_branching_mode_text(branching_mode: BranchingMode) {
+    let mode_text = match branching_mode {
+        BranchingMode::Current => "N=1",
+        BranchingMode::CurrentAndNext => "N=2",
+    };
+
+    draw_text(mode_text, 500., 200., 56., WHITE);
 }
 
 const fn get_color_of_block(val: PieceType) -> Color {
