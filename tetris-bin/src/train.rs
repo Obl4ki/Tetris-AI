@@ -1,6 +1,5 @@
 use std::fs::File;
 use std::io::Write as _;
-use std::time::Duration;
 
 use tetris_bin::args::CliArgs;
 use tetris_core::scoring::Score;
@@ -14,27 +13,9 @@ fn main() -> Result<()> {
 
     let best_entity = run_model(config)?;
     let weights = &best_entity.weights;
-    // write weight to file
 
     let mut file = File::create("best_weight.txt")?;
     file.write_all(format!("{weights:?}").as_bytes())?;
-
-    // play_game_with_entity(best_entity)?;
-
-    // run_with_weights(
-    //     vec![
-    //         0.15393606,
-    //         0.66405207,
-    //         0.08704427,
-    //         0.103674956,
-    //         -0.3822181,
-    //         0.0,
-    //     ], // najlepszy do n=1
-    //     // vec![0.8096802, 0.8273554, 0.35399604, -0.56748724, 0.30727196, 0.1149559], // najlepszy do n=2
-    //     &config.heuristics_used,
-    // )?;
-
-    //[0.8096802, 0.8273554, 0.35399604, -0.56748724, 0.30727196, 0.1149559]
 
     Ok(())
 }

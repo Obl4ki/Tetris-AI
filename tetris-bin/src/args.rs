@@ -1,11 +1,9 @@
-use anyhow::{bail, Result};
+use anyhow::Result;
 use clap::Parser;
-use heuristics::{Heuristic, HeuristicScore};
-use tetris_core::board::Board;
-use tetris_heuristics as heuristics;
+
 use tetris_ml::Config;
 
-use crate::used_heuristics::get_heuristics;
+use tetris_heuristics::used_heuristics::get_heuristics;
 
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]

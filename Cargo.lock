@@ -883,6 +883,7 @@ dependencies = [
  "tetris-core",
  "tetris-heuristics",
  "tetris-ml",
+ "tetris-ui",
 ]
 
 [[package]]
@@ -917,6 +918,17 @@ dependencies = [
  "serde",
  "tetris-core",
  "tetris-heuristics",
+]
+
+[[package]]
+name = "tetris-ui"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "macroquad",
+ "tetris-core",
+ "tetris-heuristics",
+ "tetris-ml",
 ]
 
 [[package]]

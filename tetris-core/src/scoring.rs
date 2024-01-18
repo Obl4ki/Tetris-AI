@@ -25,7 +25,7 @@ impl Score {
             3 => self.threes += 1,
             2 => self.twos += 1,
             1 => self.ones += 1,
-            _ => {},
+            _ => {}
         }
     }
 

@@ -1,8 +1,8 @@
-use tetris_heuristics::Heuristic;
+use crate::Heuristic;
 
 #[must_use]
 pub fn get_heuristics() -> Vec<Heuristic> {
-    use tetris_heuristics::heuristics as h;
+    use crate::heuristics as h;
 
     vec![
         h::bumpyness,

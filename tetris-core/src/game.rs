@@ -123,7 +123,13 @@ impl Game {
 
     #[must_use]
     pub fn is_lost(&self) -> bool {
-        self.board.iter_blocks().any(|(coord, _)| coord.y >= 20)
+        for x in 0..10 {
+            if self.board.get(Coord::new(x, 20)).is_some() {
+                return true;
+            }
+        }
+
+        false
     }
 
     fn on_drop(&mut self) {

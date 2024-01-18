@@ -47,6 +47,12 @@ impl Agent {
         })
     }
 
+    pub fn make_a_move(&mut self, branching_mode: BranchingMode) {
+        if let Some(next_state) = self.next_best_state(branching_mode) {
+            self.game = next_state;
+        }
+    }
+
     #[must_use]
     pub fn play_for_n_turns_or_lose(
         self,
@@ -55,14 +61,10 @@ impl Agent {
     ) -> Self {
         let mut entity = self;
         for _ in 0..n_turns.unwrap_or(usize::MAX) {
-            if let Some(next_entity) = entity.next_best_state(branching_mode) {
-                entity = Self {
-                    game: next_entity,
-                    ..entity
-                };
-            } else {
+            entity.make_a_move(branching_mode);
+            if entity.game.is_lost() {
                 break;
-            };
+            }
         }
         entity
     }
@@ -79,7 +81,7 @@ impl Agent {
             .into_iter()
             .map(|game| vec![game]);
 
-        let states: Vec<Vec<Game>> = if let BranchingMode::CurrentAndNext = branching_mode {
+        let states: Vec<Vec<Game>> = if branching_mode == BranchingMode::CurrentAndNext {
             states
                 .flat_map(|path| {
                     Self::get_all_possible_next_game_states(path[0].clone())

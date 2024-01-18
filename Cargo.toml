@@ -1,5 +1,5 @@
 [workspace]
-members = ["tetris-bin", "tetris-core", "tetris-heuristics", "tetris-ml"]
+members = ["tetris-bin", "tetris-core", "tetris-heuristics", "tetris-ml", "tetris-ui"]
 resolver = "2"
 
 [workspace.lints.rust]
