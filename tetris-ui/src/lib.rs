@@ -3,8 +3,10 @@ use macroquad::prelude::*;
 use tetris_core::prelude::*;
 use tetris_heuristics::used_heuristics::get_heuristics;
 use tetris_ml::{Agent, BranchingMode};
-const BLOCK_SIZE: f32 = 20.;
-const MARGIN: f32 = 5.;
+const BLOCK_SIZE: f32 = 30.;
+const BORDER: f32 = 2.;
+const GRID_SPACING: f32 = 2.;
+const BOARD_MARGIN: f32 = 5.;
 
 pub async fn run() -> Result<()> {
     let mut agent = Agent::from_weights(
@@ -26,19 +28,55 @@ pub async fn run() -> Result<()> {
         draw_background(game_width, game_height);
         draw_current_state(&agent);
 
-        agent.make_a_move(BranchingMode::CurrentAndNext);
+        agent.make_a_move(BranchingMode::Current);
 
         next_frame().await;
     }
 }
 
 fn draw_tetrimino(x: f32, y: f32, color: Color) {
-    draw_rectangle(
-        f32::abs(x - 10.).mul_add(BLOCK_SIZE, MARGIN),
-        f32::abs(y - 20.).mul_add(BLOCK_SIZE, MARGIN),
-        BLOCK_SIZE - 2.,
-        BLOCK_SIZE - 2.,
-        color,
+    let x = f32::abs(x - 10.).mul_add(BLOCK_SIZE + GRID_SPACING, BOARD_MARGIN);
+    let y = f32::abs(y - 20.).mul_add(BLOCK_SIZE + GRID_SPACING, BOARD_MARGIN);
+
+    draw_rectangle(x, y, BLOCK_SIZE, BLOCK_SIZE, color);
+    // top
+    draw_line(
+        x + BORDER / 2.,
+        y - BORDER / 2.,
+        x - BORDER / 2. + BLOCK_SIZE,
+        y - BORDER / 2.,
+        BORDER,
+        Color::from_rgba(255, 255, 255, 55),
+    );
+
+    // left
+    draw_line(
+        x + BORDER / 2.,
+        y + BORDER / 2.,
+        x - BORDER / 2.,
+        y - BORDER / 2. + BLOCK_SIZE,
+        BORDER,
+        Color::from_rgba(255, 255, 255, 55),
+    );
+
+    // right
+    draw_line(
+        x - BORDER / 2. + BLOCK_SIZE,
+        y + BORDER / 2.,
+        x - BORDER / 2. + BLOCK_SIZE,
+        y - BORDER / 2. + BLOCK_SIZE,
+        BORDER,
+        Color::from_rgba(255, 255, 255, 55),
+    );
+
+    // bottom
+    draw_line(
+        x + BORDER / 2.,
+        y - BORDER / 2. + BLOCK_SIZE,
+        x - BORDER / 2. + BLOCK_SIZE,
+        y - BORDER / 2. + BLOCK_SIZE,
+        BORDER,
+        Color::from_rgba(255, 255, 255, 55),
     );
 }
 
