@@ -123,8 +123,8 @@ impl Game {
 
     #[must_use]
     pub fn is_lost(&self) -> bool {
-        for x in 0..10 {
-            if self.board.get(Coord::new(x, 20)).is_some() {
+        for x in 0..self.width {
+            if self.board.get(Coord::new(x, self.height)).is_some() {
                 return true;
             }
         }

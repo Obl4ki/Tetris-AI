@@ -36,6 +36,7 @@ pub fn generate_grid(
     n_samples: usize,
     x_heuristic: Heuristic,
     y_heuristic: Heuristic,
+    max_drops: usize,
 ) -> Result<Vec<FitnessAtPoint>> {
     let mut locations: Vec<(f32, f32)> = Vec::with_capacity(n_samples.pow(2));
 
@@ -43,18 +44,22 @@ pub fn generate_grid(
         .into_iter()
         .cartesian_product(linspace(from, to, n_samples).into_iter())
     {
+        println!("({x}, {y})");
         locations.push((x, y));
     }
 
     locations
         .into_par_iter()
         .map(|(x, y)| {
+            println!("Agent with weights ({x}. {y})");
             let mut entity =
             Agent::from_weights(vec![x, y], &[x_heuristic, y_heuristic])?;
+
             let mut mean_fitness = 0.0;
             for _ in 0..N_TRIES {
                 entity.game = Game::new();
-                entity = entity.play_until_lost(tetris_ml::BranchingMode::Current);
+                entity = entity.play_for_n_turns_or_lose(Some(max_drops), tetris_ml::BranchingMode::Current);
+
                 mean_fitness += Population::fitness(&entity);
             }
 

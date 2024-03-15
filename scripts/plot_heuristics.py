@@ -24,8 +24,9 @@ def save_pcolormesh_to_jpg(data: np.ndarray, output_file: str, x_label: str, y_l
     plt.close()  # Close the plot to free up memory (optional)
 
 if __name__ == '__main__':
-    with open('data/output.csv', 'r') as f:
+    with open('data/output2d.csv', 'r') as f:
         head = f.readlines()[0].split(',')
     x_label, y_label, z_label = head
-    data = np.genfromtxt('data/output.csv', delimiter=',', dtype=np.float32, skip_header=1)
-    save_pcolormesh_to_jpg(data, 'data/output.jpg', x_label=x_label, y_label=y_label, z_label = z_label)
+    
+    data = np.genfromtxt('data/output2d.csv', delimiter=',', dtype=np.float32, skip_header=1)
+    save_pcolormesh_to_jpg(data, 'data/output2d.jpg', x_label=x_label, y_label=y_label, z_label = z_label)

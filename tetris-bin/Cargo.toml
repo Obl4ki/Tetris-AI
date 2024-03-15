@@ -11,6 +11,10 @@ path = "src/train.rs"
 name = "play"
 path = "src/play.rs"
 
+[[bin]]
+name = "plots"
+path = "src/plots.rs"
+
 [dependencies]
 anyhow = "1.0.75"
 clearscreen = "2.0.1"
