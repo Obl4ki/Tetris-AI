@@ -80,11 +80,6 @@ impl Population {
         finalized_population
     }
 
-    #[must_use]
-    pub const fn fitness(entity: &Agent) -> f64 {
-        entity.game.score.score as f64
-    }
-
     fn evaluate(self) -> Self {
         self.restart_games().finish_all_games()
     }
@@ -92,7 +87,7 @@ impl Population {
     #[must_use]
     // Rulette selection
     pub fn selection(self) -> Self {
-        let raw_probs: Vec<f64> = self.entities.iter().map(Self::fitness).collect();
+        let raw_probs: Vec<f64> = self.entities.iter().map(Agent::fitness).collect();
 
         let norm_min = *raw_probs
             .iter()
@@ -202,7 +197,7 @@ impl Population {
     pub fn sorted_by_performance(&self) -> Vec<&Agent> {
         let mut entity_refs = self.entities.iter().collect::<Vec<_>>();
 
-        entity_refs.sort_unstable_by(|x, y| Self::fitness(y).total_cmp(&Self::fitness(x)));
+        entity_refs.sort_unstable_by(|x, y| y.fitness().total_cmp(&x.fitness()));
         entity_refs
     }
 
@@ -215,7 +210,7 @@ impl Population {
 
     #[must_use]
     pub fn mean_fitness(&self) -> f64 {
-        self.entities.iter().map(Self::fitness).sum::<f64>() / self.entities.len() as f64
+        self.entities.iter().map(Agent::fitness).sum::<f64>() / self.entities.len() as f64
     }
 
     #[must_use]
@@ -223,9 +218,9 @@ impl Population {
         let worst = self
             .entities
             .iter()
-            .min_by(|x, y| Self::fitness(x).total_cmp(&Self::fitness(y)))
+            .min_by(|x, y| x.fitness().total_cmp(&y.fitness()))
             .unwrap();
-        Self::fitness(worst)
+        worst.fitness()
     }
 
     #[must_use]
@@ -233,9 +228,9 @@ impl Population {
         let best = self
             .entities
             .iter()
-            .max_by(|x, y| Self::fitness(x).total_cmp(&Self::fitness(y)))
+            .max_by(|x, y| x.fitness().total_cmp(&y.fitness()))
             .unwrap();
-        Self::fitness(best)
+        best.fitness()
     }
 
     #[must_use]
@@ -245,7 +240,7 @@ impl Population {
             .iter()
             .skip(self.entities.len() / 2)
             .take(take_n)
-            .map(Self::fitness)
+            .map(Agent::fitness)
             .sum::<f64>()
             / take_n as f64
     }

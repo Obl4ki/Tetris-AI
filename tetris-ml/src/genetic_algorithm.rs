@@ -41,7 +41,7 @@ impl GA {
             let best_before = current.get_best_entity();
             let best_after = next.get_best_entity();
 
-            if Population::fitness(best_before) >= Population::fitness(best_after) {
+            if best_before.fitness() >= best_after.fitness() {
                 self.max_non_progress = self.max_non_progress.map(|x| x.saturating_sub(1));
             }
 
@@ -67,15 +67,16 @@ impl GA {
             .populations
             .par_iter()
             .max_by(|p1, p2| {
-                Population::fitness(p1.get_best_entity())
-                    .total_cmp(&Population::fitness(p2.get_best_entity()))
+                p1.get_best_entity()
+                    .fitness()
+                    .total_cmp(&p2.get_best_entity().fitness())
             })
             .unwrap();
 
         population_with_best_agent
             .entities
             .par_iter()
-            .max_by(|x, y| Population::fitness(x).total_cmp(&Population::fitness(y)))
+            .max_by(|x, y| x.fitness().total_cmp(&y.fitness()))
             .unwrap()
             .clone()
     }

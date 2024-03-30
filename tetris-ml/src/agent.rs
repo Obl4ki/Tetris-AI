@@ -47,6 +47,10 @@ impl Agent {
         })
     }
 
+    pub fn fitness(&self) -> f64 {
+        self.game.score.score as f64
+    }
+
     pub fn make_a_move(&mut self, branching_mode: BranchingMode) {
         if let Some(next_state) = self.next_best_state(branching_mode) {
             self.game = next_state;

@@ -4,7 +4,7 @@ use itertools::Itertools;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
 use tetris_core::game::Game;
 use tetris_heuristics::Heuristic;
-use tetris_ml::{Agent, Population};
+use tetris_ml::Agent;
 
 fn linspace(start: f32, stop: f32, num: usize) -> Vec<f32> {
     if num == 0 {
@@ -60,7 +60,7 @@ pub fn generate_grid(
                 entity.game = Game::new();
                 entity = entity.play_for_n_turns_or_lose(Some(max_drops), tetris_ml::BranchingMode::Current);
 
-                mean_fitness += Population::fitness(&entity);
+                mean_fitness += entity.fitness();
             }
 
             Ok(FitnessAtPoint { x, y, fitness: mean_fitness / N_TRIES as f64 })
