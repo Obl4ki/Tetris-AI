@@ -47,13 +47,13 @@ fn run_model(mut config: Config) -> Result<Agent> {
         println!("| Cleared rows |   Score   | Dropped pieces |");
         println!("|-------------------------------------------|");
         println!("|{cleared_rows:^14.2}|{score:^11.2}|{dropped_pieces:^16.2}|");
+        println!("\\-------------------------------------------/");
 
         println!("Fours: {fours}");
         println!("Threes: {threes}");
         println!("Twos: {twos}");
         println!("Ones: {ones}");
-        println!("\\-------------------------------------------/");
-
+        
         println!("-----------------------------------------------------------");
     })?;
 

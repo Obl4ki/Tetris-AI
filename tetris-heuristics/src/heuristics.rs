@@ -28,7 +28,7 @@ pub fn holes_present(state: &Board) -> HeuristicScore {
     for (x, highest_y) in highest_blocks_x_axis.into_iter().enumerate() {
         score += (0..highest_y)
             .rev()
-            .filter(|y| state.get(Coord::new(x as i32, *y as i32)).is_none())
+            .filter(|&y| state.get(Coord::new(x as i32, y as i32)).is_none())
             .count() as f32;
     }
 

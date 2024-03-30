@@ -29,13 +29,15 @@ impl Board {
     }
 
     #[inline]
-    pub fn set(&mut self, block_type: Option<PieceType>, loc: Coord<usize>) {
+    pub fn set(&mut self, block_type: Option<PieceType>, loc: impl Into<Coord<usize>>) {
+        let loc: Coord<usize> = loc.into();
         self.grid[loc.x][loc.y] = block_type;
     }
 
     #[must_use]
     #[inline]
-    pub fn get(&self, loc: Coord<i32>) -> Option<PieceType> {
+    pub fn get(&self, loc: impl Into<Coord<i32>>) -> Option<PieceType> {
+        let loc: Coord<i32> = loc.into();
         let col = self.grid.get(loc.x as usize)?;
         let element = col.get(loc.y as usize)?;
         *element
@@ -75,13 +77,13 @@ impl Board {
     fn delete_line_and_shift_upper_lines_down(&mut self, y: usize) {
         for upper_y in y + 1..H {
             for x in 0..W {
-                let upper_block = self.get((x as i32, upper_y as i32).into());
-                self.set(upper_block, (x, upper_y - 1).into());
+                let upper_block = self.get((x as i32, upper_y as i32));
+                self.set(upper_block, (x, upper_y - 1));
             }
         }
 
         for x in 0..W {
-            self.set(None, (x, H - 1).into());
+            self.set(None, (x, H - 1));
         }
     }
 }

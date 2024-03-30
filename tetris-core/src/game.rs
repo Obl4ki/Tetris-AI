@@ -36,7 +36,7 @@ impl Game {
     /// Check if after the move in the specified direction there will
     /// be any collision.
     #[must_use]
-    pub fn get_collision_after_move(&self, dir: Direction, piece: &Piece) -> Collision {
+    pub fn get_collision_after_move(&self, piece: &Piece, dir: Direction) -> Collision {
         let dir = Coord::from(dir);
 
         for mut block_pos in piece.iter_blocks() {
@@ -65,28 +65,33 @@ impl Game {
         Collision::None
     }
 
+    fn doesnt_collide(&self, piece: &Piece, dir: Direction) -> bool {
+        self.get_collision_after_move(piece, dir) == Collision::None
+    }
+
     pub fn go_left(&mut self) {
-        if self.get_collision_after_move(Direction::Left, &self.piece) == Collision::None {
+        if self.doesnt_collide(&self.piece, Direction::Left) {
             self.piece.anchor_point.x -= 1;
         }
     }
 
     pub fn go_right(&mut self) {
-        if self.get_collision_after_move(Direction::Right, &self.piece) == Collision::None {
+        if self.doesnt_collide(&self.piece, Direction::Right) {
             self.piece.anchor_point.x += 1;
         }
     }
 
     pub fn go_down(&mut self) {
-        if self.get_collision_after_move(Direction::Down, &self.piece) == Collision::None {
+        if self.doesnt_collide(&self.piece, Direction::Down) {
             self.piece.anchor_point.y -= 1;
         } else {
+            // ewentualne zbicie linii, podwyższenie punktów
             self.on_drop();
         }
     }
 
     pub fn hard_drop(&mut self) {
-        while self.get_collision_after_move(Direction::Down, &self.piece) == Collision::None {
+        while self.doesnt_collide(&self.piece, Direction::Down) {
             self.piece.anchor_point.y -= 1;
         }
 
@@ -111,7 +116,7 @@ impl Game {
             kicked_piece.anchor_point -= offset;
 
             // jeżeli tetrimino nie koliduje z żadnymi blokami, to znaleziono alternatywną pozycję
-            if self.get_collision_after_move(Direction::None, &kicked_piece) == Collision::None {
+            if self.doesnt_collide(&kicked_piece, Direction::None) {
                 self.piece = kicked_piece;
                 return;
             }
@@ -123,13 +128,7 @@ impl Game {
 
     #[must_use]
     pub fn is_lost(&self) -> bool {
-        for x in 0..self.width {
-            if self.board.get(Coord::new(x, self.height)).is_some() {
-                return true;
-            }
-        }
-
-        false
+        (0..self.width).any(|idx| self.board.get((idx, self.height)).is_some())
     }
 
     fn on_drop(&mut self) {
@@ -150,8 +149,7 @@ impl Game {
         for piece_coords in self.piece.iter_blocks() {
             self.board.set(
                 Some(self.piece.block_type),
-                piece_coords
-                    .try_into()
+                Coord::<usize>::try_from(piece_coords)
                     .expect("Every piece block should be inside the board."),
             );
         }

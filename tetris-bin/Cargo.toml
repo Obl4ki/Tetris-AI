@@ -24,7 +24,7 @@ tetris-heuristics = { path = "../tetris-heuristics" }
 tetris-ui = { path = "../tetris-ui" }
 clap = { version = "4.4.8", features = ["derive"] }
 rayon = "1.8.0"
-indicatif = {version = "*", features = ["rayon"]}
+indicatif = { version = "*", features = ["rayon"] }
 itertools = "0.12"
 macroquad = "0.4.4"
 
