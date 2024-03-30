@@ -47,7 +47,8 @@ impl Agent {
         })
     }
 
-    pub fn fitness(&self) -> f64 {
+    #[must_use]
+    pub const fn fitness(&self) -> f64 {
         self.game.score.score as f64
     }
 
