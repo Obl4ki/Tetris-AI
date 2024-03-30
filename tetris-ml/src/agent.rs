@@ -81,28 +81,33 @@ impl Agent {
 
     #[must_use]
     pub fn next_best_state(&self, branching_mode: BranchingMode) -> Option<Game> {
-        Some(if branching_mode == BranchingMode::Current {
-            Self::get_all_possible_next_game_states(self.game.clone())
+        let next_state = match branching_mode {
+            BranchingMode::Current => Self::get_all_possible_next_game_states(self.game.clone())
                 .into_iter()
                 .min_by(|a, b| {
                     self.forward_with_board(&a.board)
                         .total_cmp(&self.forward_with_board(&b.board))
-                })?
-        } else {
-            Self::get_all_possible_next_game_states(self.game.clone())
-                .into_iter()
-                .map(|game| vec![game])
-                .flat_map(|path: Vec<Game>| {
-                    Self::get_all_possible_next_game_states(path[0].clone())
-                        .into_iter()
-                        .map(move |next| vec![path[0].clone(), next])
-                })
-                .min_by(|path1, path2| {
-                    self.forward_with_board(&path1.last().unwrap().board)
-                        .total_cmp(&self.forward_with_board(&path2.last().unwrap().board))
-                })?[0]
-                .clone()
-        })
+                })?,
+
+            BranchingMode::CurrentAndNext => {
+                Self::get_all_possible_next_game_states(self.game.clone())
+                    .into_iter()
+                    .map(|game| vec![game])
+                    .flat_map(|path: Vec<Game>| {
+                        Self::get_all_possible_next_game_states(path[0].clone())
+                            .into_iter()
+                            .map(move |next| vec![path[0].clone(), next])
+                    })
+                    .min_by(|path1, path2| {
+                        self.forward_with_board(&path1.last().unwrap().board)
+                            .total_cmp(&self.forward_with_board(&path2.last().unwrap().board))
+                    })?
+                    .first()?
+                    .clone()
+            }
+        };
+
+        Some(next_state)
     }
 
     const ACTIONS: [fn(&mut Game); 6] = [
