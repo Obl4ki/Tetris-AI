@@ -28,7 +28,7 @@ pub fn holes_present(state: &Board) -> HeuristicScore {
     for (x, highest_y) in highest_blocks_x_axis.into_iter().enumerate() {
         score += (0..highest_y)
             .rev()
-            .filter(|&y| state.get(Coord::new(x as i32, y as i32)).is_none())
+            .filter(|&y| state.get((x as i32, y as i32)).is_none())
             .count() as f32;
     }
 
@@ -53,7 +53,7 @@ pub fn bumpyness(state: &Board) -> HeuristicScore {
     let highest_blocks_x_axis = get_cols_max_heights(state);
 
     let mut score = 0.;
-    for (prev, next) in highest_blocks_x_axis.into_iter().tuple_windows::<(_, _)>() {
+    for (prev, next) in highest_blocks_x_axis.into_iter().tuple_windows() {
         score += prev.abs_diff(next) as f32;
     }
 
@@ -64,13 +64,13 @@ pub fn bumpyness(state: &Board) -> HeuristicScore {
 #[must_use]
 pub fn relative_diff(state: &Board) -> HeuristicScore {
     let heights = get_cols_max_heights(state);
-    let max = heights.iter().max().copied().unwrap_or_default() as f32;
-    let min = heights.iter().min().copied().unwrap_or_default() as f32;
+    let max = heights.iter().max().copied().unwrap_or_default() as HeuristicScore;
+    let min = heights.iter().min().copied().unwrap_or_default() as HeuristicScore;
     max - min
 }
 
 #[must_use]
-pub fn clear_potential(state: &Board) -> HeuristicScore {
+pub fn i_clear_potential(state: &Board) -> HeuristicScore {
     let mut game = Game::new();
     game.board = *state;
     game.piece = Piece::new(PieceType::I);
@@ -90,7 +90,7 @@ pub fn clear_potential(state: &Board) -> HeuristicScore {
         game.piece.anchor_point.x += 1;
     }
 
-    maximum_clears as f32
+    maximum_clears as HeuristicScore
 }
 
 #[must_use]
@@ -104,9 +104,8 @@ pub fn distance_mean_from_4(state: &Board) -> HeuristicScore {
         .max_by_key(|(_, count)| *count);
 
     match most_common_height {
-        Some((height, _)) if height >= 4 => 2usize.pow((height - 4) as u32) as HeuristicScore,
-        Some((height, _)) => (4 - height) as HeuristicScore,
-        None => 0.,
+        Some((height, _)) if height >= 4 => (height - 4).pow(2) as HeuristicScore,
+        Some(_) | None => 0.,
     }
 }
 
@@ -118,7 +117,7 @@ mod tests {
     use tetris_core::entities::PieceType as PT;
 
     use super::{
-        bumpyness, clear_potential, get_cols_max_heights, highest_block, holes_present,
+        bumpyness, get_cols_max_heights, highest_block, holes_present, i_clear_potential,
         relative_diff,
     };
 
@@ -212,7 +211,7 @@ mod tests {
         }
         let game = gb.build();
 
-        let res = clear_potential(&game.board);
+        let res = i_clear_potential(&game.board);
         assert!(((res - 1.).abs() < f32::EPSILON));
 
         // well on right
@@ -222,7 +221,7 @@ mod tests {
         }
         let game = gb.build();
 
-        let res = clear_potential(&game.board);
+        let res = i_clear_potential(&game.board);
         assert!(((res - 1.).abs() < f32::EPSILON));
 
         // well on right height 2
@@ -233,7 +232,7 @@ mod tests {
         }
         let game = gb.build();
 
-        let res = clear_potential(&game.board);
+        let res = i_clear_potential(&game.board);
         assert!(((res - 2.).abs() < f32::EPSILON));
     }
 }

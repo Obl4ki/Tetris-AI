@@ -36,7 +36,7 @@ impl GA {
             }
 
             let current = self.get_current_population();
-            let next = current.advance();
+            let next = current.advance_population();
 
             let best_before = current.get_best_entity();
             let best_after = next.get_best_entity();

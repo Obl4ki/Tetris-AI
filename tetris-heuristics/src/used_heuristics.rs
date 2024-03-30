@@ -9,7 +9,7 @@ pub fn get_heuristics() -> Vec<Heuristic> {
         h::holes_present,
         h::relative_diff,
         h::highest_block,
-        h::clear_potential,
+        h::i_clear_potential,
         // h::distance_mean_from_4,
     ]
 }

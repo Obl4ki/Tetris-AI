@@ -53,7 +53,7 @@ fn run_model(mut config: Config) -> Result<Agent> {
         println!("Threes: {threes}");
         println!("Twos: {twos}");
         println!("Ones: {ones}");
-        
+
         println!("-----------------------------------------------------------");
     })?;
 

@@ -1,4 +1,5 @@
-use std::{cmp::Ordering, ops, sync::Arc};
+use std::ops::RangeInclusive;
+use std::{cmp::Ordering, sync::Arc};
 
 use anyhow::Result;
 use rand::{
@@ -46,13 +47,13 @@ impl Population {
     }
 
     #[must_use]
-    pub fn advance(&self) -> Self {
+    pub fn advance_population(&self) -> Self {
+        const WEIGHT_RANGE: RangeInclusive<f32> = -1.0..=1.0;
         self.clone()
-            .restart_games()
-            .finish_all_games()
+            .evaluate()
             .selection()
             .crossover()
-            .mutation(-1.0..1.0)
+            .mutation(WEIGHT_RANGE)
     }
 
     #[must_use]
@@ -82,6 +83,10 @@ impl Population {
     #[must_use]
     pub const fn fitness(entity: &Agent) -> f64 {
         entity.game.score.score as f64
+    }
+
+    fn evaluate(self) -> Self {
+        self.restart_games().finish_all_games()
     }
 
     #[must_use]
@@ -163,7 +168,7 @@ impl Population {
     }
 
     #[must_use]
-    pub fn mutation(self, weights_sampling_interval: ops::Range<f32>) -> Self {
+    pub fn mutation(self, weights_sampling_interval: RangeInclusive<f32>) -> Self {
         let mut rng = thread_rng();
 
         let new_population = self
