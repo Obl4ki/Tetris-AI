@@ -23,7 +23,7 @@ impl GA {
     }
 
     #[must_use]
-    pub fn get_current_population(&self) -> &Population {
+    fn get_current_population(&self) -> &Population {
         self.populations
             .last()
             .expect("New constructs GA with at least 1 starting population, so last population will always exist.")
@@ -47,18 +47,6 @@ impl GA {
 
             self.populations.push(next);
         }
-    }
-
-    pub fn advance(&mut self) -> Option<&Population> {
-        if matches!(self.max_non_progress, Some(n) if n == 0) {
-            return None;
-        }
-
-        if matches!(self.max_populations, Some(max) if max >= self.populations.len()) {
-            return None;
-        }
-
-        Some(self.get_current_population())
     }
 
     #[must_use]

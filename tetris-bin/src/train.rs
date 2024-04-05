@@ -20,7 +20,6 @@ fn main() -> Result<()> {
     Ok(())
 }
 
-#[allow(unused)]
 fn run_model(mut config: Config) -> Result<Agent> {
     let mut ga = GA::new(&mut config, |population| {
         let best_entity = population.get_best_entity();
@@ -43,7 +42,7 @@ fn run_model(mut config: Config) -> Result<Agent> {
             ones,
         } = best_entity.game.score;
 
-        println!("/--------------------------------------------");
+        println!("/-------------------------------------------\\");
         println!("| Cleared rows |   Score   | Dropped pieces |");
         println!("|-------------------------------------------|");
         println!("|{cleared_rows:^14.2}|{score:^11.2}|{dropped_pieces:^16.2}|");
