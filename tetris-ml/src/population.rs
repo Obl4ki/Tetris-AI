@@ -1,5 +1,5 @@
 use std::ops::RangeInclusive;
-use std::{cmp::Ordering, sync::Arc};
+use std::sync::Arc;
 
 use anyhow::Result;
 use rand::{
@@ -56,8 +56,20 @@ impl Population {
             .mutation(WEIGHT_RANGE)
     }
 
+    fn evaluate(self) -> Self {
+        self.restart_games().finish_all_games()
+    }
+
     #[must_use]
-    pub fn finish_all_games(self) -> Self {
+    fn restart_games(mut self) -> Self {
+        self.entities
+            .par_iter_mut()
+            .for_each(|x: &mut Agent| x.game = Game::new());
+        self
+    }
+
+    #[must_use]
+    fn finish_all_games(self) -> Self {
         let completed_population = self
             .entities
             .into_par_iter()
@@ -80,26 +92,17 @@ impl Population {
         finalized_population
     }
 
-    fn evaluate(self) -> Self {
-        self.restart_games().finish_all_games()
-    }
-
     #[must_use]
     // Rulette selection
-    pub fn selection(self) -> Self {
-        let raw_probs: Vec<f64> = self.entities.iter().map(Agent::fitness).collect();
-
-        let norm_min = *raw_probs
+    fn selection(self) -> Self {
+        let probs: Vec<f64> = self
+            .entities
             .iter()
-            .min_by(|a, b| a.partial_cmp(b).unwrap_or(Ordering::Equal))
-            .unwrap();
+            .map(Agent::fitness)
+            .map(|fitness| fitness + 1.) // zabezpieczenie przed sytuacją, gdyby wszystkie fitness score były równe 0
+            .collect();
 
-        let norm_probs = raw_probs
-            .into_iter()
-            .map(|x| x - norm_min)
-            .collect::<Vec<f64>>();
-
-        let dist = WeightedIndex::new(norm_probs).unwrap();
+        let dist = WeightedIndex::new(probs).unwrap();
 
         let rng = thread_rng();
 
@@ -116,7 +119,7 @@ impl Population {
     }
 
     #[must_use]
-    pub fn crossover(self) -> Self {
+    fn crossover(self) -> Self {
         let cross_method = |w1: f32, w2: f32| -> f32 {
             let alpha: f32 = rand::thread_rng().gen_range(0.0..1.0);
 
@@ -163,7 +166,7 @@ impl Population {
     }
 
     #[must_use]
-    pub fn mutation(self, weights_sampling_interval: RangeInclusive<f32>) -> Self {
+    fn mutation(self, weights_sampling_interval: RangeInclusive<f32>) -> Self {
         let mut rng = thread_rng();
 
         let new_population = self
@@ -186,15 +189,7 @@ impl Population {
     }
 
     #[must_use]
-    pub fn restart_games(mut self) -> Self {
-        self.entities
-            .par_iter_mut()
-            .for_each(|x: &mut Agent| x.game = Game::new());
-        self
-    }
-
-    #[must_use]
-    pub fn sorted_by_performance(&self) -> Vec<&Agent> {
+    fn sorted_by_performance(&self) -> Vec<&Agent> {
         let mut entity_refs = self.entities.iter().collect::<Vec<_>>();
 
         entity_refs.sort_unstable_by(|x, y| y.fitness().total_cmp(&x.fitness()));
