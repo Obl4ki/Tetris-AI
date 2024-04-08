@@ -12,8 +12,8 @@ name = "play"
 path = "src/play.rs"
 
 [[bin]]
-name = "plots"
-path = "src/plots.rs"
+name = "stats"
+path = "src/stats.rs"
 
 [dependencies]
 anyhow = "1.0.75"
