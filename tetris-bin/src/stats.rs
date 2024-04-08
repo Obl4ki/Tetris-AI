@@ -7,17 +7,9 @@ use tetris_ml::{Config, GA};
 fn main() -> Result<()> {
     let configs = [
         Config {
-            n_entities: 500,
-            mutation_rate: 0.02,
-            max_drops: Some(20_000),
-            max_populations: Some(30),
-            max_non_progress_populations: None,
-            heuristics_used: get_heuristics(),
-        },
-        Config {
             n_entities: 1000,
             mutation_rate: 0.02,
-            max_drops: Some(10_000),
+            max_drops: Some(5_000),
             max_populations: Some(30),
             max_non_progress_populations: None,
             heuristics_used: get_heuristics(),

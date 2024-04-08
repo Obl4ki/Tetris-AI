@@ -10,6 +10,6 @@ pub fn get_heuristics() -> Vec<Heuristic> {
         h::relative_diff,
         h::highest_block,
         h::i_clear_potential,
-        // h::distance_mean_from_4,
+        h::distance_mean_from_4,
     ]
 }
